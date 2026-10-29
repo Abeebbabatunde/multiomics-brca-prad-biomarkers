@@ -1,0 +1,127 @@
+# ============================================================
+> # STEP 5.0 — MULTIOMICS INTEGRATION
+> # DATA AUDIT
+> # ============================================================
+> 
+> cat("\n========== BRCA ==========\n")
+
+========== BRCA ==========
+> 
+> cat("\nBRCA files:\n")
+
+BRCA files:
+> print(list.files(
++   recursive = TRUE,
++   pattern = "\\.rds$|\\.RData$|\\.rda$",
++   full.names = TRUE
++ ))
+ [1] "./01_RawData/Breast/brca_meth.rds"                                         
+ [2] "./01_RawData/Breast/brca_meth_meta_minimal.rds"                            
+ [3] "./01_RawData/Breast/brca_prot_groups.rds"                                  
+ [4] "./01_RawData/Breast/brca_prot_meta.rds"                                    
+ [5] "./01_RawData/Breast/brca_prot_meta_full.rds"                               
+ [6] "./01_RawData/Breast/brca_rna.rds"                                          
+ [7] "./01_RawData/Breast/brca_rna_clinical_full.rds"                            
+ [8] "./01_RawData/Breast/brca_rna_meta_minimal.rds"                             
+ [9] "./01_RawData/Prostate/prad_meth.rds"                                       
+[10] "./01_RawData/Prostate/prad_meth_meta.rds"                                  
+[11] "./01_RawData/Prostate/prad_prot_groups.rds"                                
+[12] "./01_RawData/Prostate/prad_rna.rds"                                        
+[13] "./01_RawData/Prostate/prad_rna_meta.rds"                                   
+[14] "./02_ProcessedData/Breast/brca_meth_clinical_full.rds"                     
+[15] "./02_ProcessedData/Breast/brca_meth_filtered_group.rds"                    
+[16] "./02_ProcessedData/Breast/brca_meth_filtered_matrix.rds"                   
+[17] "./02_ProcessedData/Breast/brca_meth_meta_aligned.rds"                      
+[18] "./02_ProcessedData/Breast/brca_meth_top50000.rds"                          
+[19] "./02_ProcessedData/Breast/brca_prot_meta.rds"                              
+[20] "./02_ProcessedData/Breast/brca_rna_meta.rds"                               
+[21] "./02_ProcessedData/Breast/brca_vst.rds"                                    
+[22] "./02_ProcessedData/Breast/dds_brca.rds"                                    
+[23] "./02_ProcessedData/Prostate/dds_prad.rds"                                  
+[24] "./02_ProcessedData/Prostate/prad_meth_meta.rds"                            
+[25] "./02_ProcessedData/Prostate/prad_prot_meta.rds"                            
+[26] "./02_ProcessedData/Prostate/prad_rna_meta.rds"                             
+[27] "./03_Results/Epigenomics/prad_DMPs_corrected_results.rds"                  
+[28] "./03_Results/Epigenomics/prad_methylRRA_KEGG.rds"                          
+[29] "./03_Results/Proteomics/BRCA_proteomics_GO_BP_ORA_corrected.rds"           
+[30] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA.rds"                      
+[31] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA_corrected.rds"            
+[32] "./03_Results/Proteomics/prad_DEPs_all.rds"                                 
+[33] "./03_Results/Proteomics/prad_protein_metadata.rds"                         
+[34] "./03_Results/Proteomics/prad_protein_normalized.rds"                       
+[35] "./03_Results/Proteomics/PRAD_proteomics_background_Entrez.rds"             
+[36] "./03_Results/Proteomics/PRAD_proteomics_clean_mapped.rds"                  
+[37] "./03_Results/Proteomics/PRAD_proteomics_FDR_sig_Entrez.rds"                
+[38] "./03_Results/Proteomics/PRAD_proteomics_GO_BP_ORA_nominal.rds"             
+[39] "./03_Results/Proteomics/PRAD_proteomics_KEGG_ORA_nominal.rds"              
+[40] "./03_Results/Proteomics/PRAD_proteomics_nominal_sig_Entrez.rds"            
+[41] "./03_Results/Transcriptomics/BRCA_transcriptomics_GO_BP_GSEA.rds"          
+[42] "./03_Results/Transcriptomics/BRCA_transcriptomics_KEGG_GSEA.rds"           
+[43] "./03_Results/Transcriptomics/PRAD_transcriptomics_GO_BP_GSEA.rds"          
+[44] "./03_Results/Transcriptomics/PRAD_transcriptomics_KEGG_GSEA.rds"           
+[45] "./04_Figures/PCA_Breast_RNA.rds"                                           
+[46] "./df.rds"                                                                  
+[47] "./results.rds"                                                             
+[48] "./results/step2_2_methylation_diff/breast_methylation_diffmeth_results.rds"
+[49] "./results/step2_2_methylation_diff/checkpoint_partial_results.rds"         
+> 
+> cat("\n========== PRAD ==========\n")
+
+========== PRAD ==========
+> 
+> # Same complete file inventory
+> print(list.files(
++   recursive = TRUE,
++   pattern = "\\.rds$|\\.RData$|\\.rda$",
++   full.names = TRUE
++ ))
+ [1] "./01_RawData/Breast/brca_meth.rds"                                         
+ [2] "./01_RawData/Breast/brca_meth_meta_minimal.rds"                            
+ [3] "./01_RawData/Breast/brca_prot_groups.rds"                                  
+ [4] "./01_RawData/Breast/brca_prot_meta.rds"                                    
+ [5] "./01_RawData/Breast/brca_prot_meta_full.rds"                               
+ [6] "./01_RawData/Breast/brca_rna.rds"                                          
+ [7] "./01_RawData/Breast/brca_rna_clinical_full.rds"                            
+ [8] "./01_RawData/Breast/brca_rna_meta_minimal.rds"                             
+ [9] "./01_RawData/Prostate/prad_meth.rds"                                       
+[10] "./01_RawData/Prostate/prad_meth_meta.rds"                                  
+[11] "./01_RawData/Prostate/prad_prot_groups.rds"                                
+[12] "./01_RawData/Prostate/prad_rna.rds"                                        
+[13] "./01_RawData/Prostate/prad_rna_meta.rds"                                   
+[14] "./02_ProcessedData/Breast/brca_meth_clinical_full.rds"                     
+[15] "./02_ProcessedData/Breast/brca_meth_filtered_group.rds"                    
+[16] "./02_ProcessedData/Breast/brca_meth_filtered_matrix.rds"                   
+[17] "./02_ProcessedData/Breast/brca_meth_meta_aligned.rds"                      
+[18] "./02_ProcessedData/Breast/brca_meth_top50000.rds"                          
+[19] "./02_ProcessedData/Breast/brca_prot_meta.rds"                              
+[20] "./02_ProcessedData/Breast/brca_rna_meta.rds"                               
+[21] "./02_ProcessedData/Breast/brca_vst.rds"                                    
+[22] "./02_ProcessedData/Breast/dds_brca.rds"                                    
+[23] "./02_ProcessedData/Prostate/dds_prad.rds"                                  
+[24] "./02_ProcessedData/Prostate/prad_meth_meta.rds"                            
+[25] "./02_ProcessedData/Prostate/prad_prot_meta.rds"                            
+[26] "./02_ProcessedData/Prostate/prad_rna_meta.rds"                             
+[27] "./03_Results/Epigenomics/prad_DMPs_corrected_results.rds"                  
+[28] "./03_Results/Epigenomics/prad_methylRRA_KEGG.rds"                          
+[29] "./03_Results/Proteomics/BRCA_proteomics_GO_BP_ORA_corrected.rds"           
+[30] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA.rds"                      
+[31] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA_corrected.rds"            
+[32] "./03_Results/Proteomics/prad_DEPs_all.rds"                                 
+[33] "./03_Results/Proteomics/prad_protein_metadata.rds"                         
+[34] "./03_Results/Proteomics/prad_protein_normalized.rds"                       
+[35] "./03_Results/Proteomics/PRAD_proteomics_background_Entrez.rds"             
+[36] "./03_Results/Proteomics/PRAD_proteomics_clean_mapped.rds"                  
+[37] "./03_Results/Proteomics/PRAD_proteomics_FDR_sig_Entrez.rds"                
+[38] "./03_Results/Proteomics/PRAD_proteomics_GO_BP_ORA_nominal.rds"             
+[39] "./03_Results/Proteomics/PRAD_proteomics_KEGG_ORA_nominal.rds"              
+[40] "./03_Results/Proteomics/PRAD_proteomics_nominal_sig_Entrez.rds"            
+[41] "./03_Results/Transcriptomics/BRCA_transcriptomics_GO_BP_GSEA.rds"          
+[42] "./03_Results/Transcriptomics/BRCA_transcriptomics_KEGG_GSEA.rds"           
+[43] "./03_Results/Transcriptomics/PRAD_transcriptomics_GO_BP_GSEA.rds"          
+[44] "./03_Results/Transcriptomics/PRAD_transcriptomics_KEGG_GSEA.rds"           
+[45] "./04_Figures/PCA_Breast_RNA.rds"                                           
+[46] "./df.rds"                                                                  
+[47] "./results.rds"                                                             
+[48] "./results/step2_2_methylation_diff/breast_methylation_diffmeth_results.rds"
+[49] "./results/step2_2_methylation_diff/checkpoint_partial_results.rds"         
+>

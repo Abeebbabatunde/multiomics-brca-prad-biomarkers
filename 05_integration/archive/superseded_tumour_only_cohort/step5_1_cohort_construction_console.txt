@@ -1,0 +1,377 @@
+============================================================
+> cat("STEP 5.1 — FINAL MULTI-OMICS COHORT CONSTRUCTION\n")
+STEP 5.1 — FINAL MULTI-OMICS COHORT CONSTRUCTION
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> # ------------------------------------------------------------
+> # 1. Load harmonized manifest
+> # ------------------------------------------------------------
+> 
+> manifest <- read.csv(
++   "00.5_clinical_metadata_harmonization/sample_manifest_harmonized.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # PART A — BRCA 3-OMICS COHORT
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("PART A — BRCA 3-OMICS COHORT\n")
+PART A — BRCA 3-OMICS COHORT
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> brca_3omics <- subset(
++   manifest,
++   project == "BRCA" &
++     has_epigenomics == TRUE &
++     has_transcriptomics == TRUE &
++     has_proteomics == TRUE
++ )
+> 
+> 
+> # ------------------------------------------------------------
+> # Check BRCA cohort
+> # ------------------------------------------------------------
+> 
+> cat("\nNumber of BRCA 3-omics patients:",
++     nrow(brca_3omics),
++     "\n")
+
+Number of BRCA 3-omics patients: 31 
+> 
+> cat("\nBRCA 3-omics patient IDs:\n")
+
+BRCA 3-omics patient IDs:
+> print(brca_3omics$patient_id)
+ [1] "TCGA-AR-A0TX" "TCGA-AR-A0TV" "TCGA-A2-A0YM" "TCGA-AR-A1AS" "TCGA-AR-A1AW"
+ [6] "TCGA-AO-A126" "TCGA-BH-A0DD" "TCGA-BH-A0DG" "TCGA-A2-A0YI" "TCGA-A7-A0CE"
+[11] "TCGA-AO-A12B" "TCGA-AO-A0JC" "TCGA-A2-A0YD" "TCGA-AO-A12E" "TCGA-AR-A1AP"
+[16] "TCGA-BH-A0E1" "TCGA-AR-A1AQ" "TCGA-AO-A0JJ" "TCGA-AO-A0JM" "TCGA-BH-A0C0"
+[21] "TCGA-A2-A0T6" "TCGA-BH-A0HK" "TCGA-AR-A0TR" "TCGA-A2-A0YF" "TCGA-AR-A1AV"
+[26] "TCGA-BH-A0BV" "TCGA-A2-A0T7" "TCGA-A2-A0SX" "TCGA-AR-A0U4" "TCGA-BH-A18V"
+[31] "TCGA-A2-A0YC"
+> 
+> 
+> # ------------------------------------------------------------
+> # Check duplicates
+> # ------------------------------------------------------------
+> 
+> cat("\nDuplicate BRCA patient IDs:\n")
+
+Duplicate BRCA patient IDs:
+> 
+> brca_duplicates <- brca_3omics$patient_id[
++   duplicated(brca_3omics$patient_id)
++ ]
+> 
+> print(brca_duplicates)
+character(0)
+> 
+> cat(
++   "Number of duplicated BRCA IDs:",
++   length(brca_duplicates),
++   "\n"
++ )
+Number of duplicated BRCA IDs: 0 
+> 
+> 
+> # ------------------------------------------------------------
+> # Verify all three flags
+> # ------------------------------------------------------------
+> 
+> cat("\nBRCA omics flags:\n")
+
+BRCA omics flags:
+> 
+> print(
++   table(
++     brca_3omics$has_epigenomics,
++     brca_3omics$has_transcriptomics,
++     brca_3omics$has_proteomics
++   )
++ )
+, ,  = TRUE
+
+      
+       TRUE
+  TRUE   31
+
+> 
+> 
+> # ------------------------------------------------------------
+> # Save BRCA cohort
+> # ------------------------------------------------------------
+> 
+> write.csv(
++   brca_3omics,
++   "05_FinalResults/Step5_BRCA_3omics_cohort.csv",
++   row.names = FALSE
++ )
+> 
+> saveRDS(
++   brca_3omics,
++   "05_FinalResults/Step5_BRCA_3omics_cohort.rds"
++ )
+> 
+> 
+> # ============================================================
+> # PART B — PRAD 2-OMICS COHORT
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("PART B — PRAD 2-OMICS COHORT\n")
+PART B — PRAD 2-OMICS COHORT
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> prad_2omics <- subset(
++   manifest,
++   project == "PRAD" &
++     has_epigenomics == TRUE &
++     has_transcriptomics == TRUE
++ )
+> 
+> 
+> # ------------------------------------------------------------
+> # Check PRAD cohort
+> # ------------------------------------------------------------
+> 
+> cat("\nNumber of PRAD 2-omics patients:",
++     nrow(prad_2omics),
++     "\n")
+
+Number of PRAD 2-omics patients: 187 
+> 
+> cat("\nFirst PRAD 2-omics patient IDs:\n")
+
+First PRAD 2-omics patient IDs:
+> print(head(prad_2omics$patient_id, 20))
+ [1] "TCGA-XK-AAK1" "TCGA-HC-7748" "TCGA-EJ-A46H" "TCGA-EJ-7791" "TCGA-EJ-7123"
+ [6] "TCGA-CH-5790" "TCGA-KC-A4BL" "TCGA-HC-8259" "TCGA-KK-A8IM" "TCGA-EJ-5525"
+[11] "TCGA-HC-8213" "TCGA-J4-A83M" "TCGA-VN-A88P" "TCGA-KC-A4BN" "TCGA-J4-8200"
+[16] "TCGA-J4-A83K" "TCGA-EJ-A7NJ" "TCGA-SU-A7E7" "TCGA-KK-A6E3" "TCGA-WW-A8ZI"
+> 
+> 
+> # ------------------------------------------------------------
+> # Check duplicates
+> # ------------------------------------------------------------
+> 
+> cat("\nDuplicate PRAD patient IDs:\n")
+
+Duplicate PRAD patient IDs:
+> 
+> prad_duplicates <- prad_2omics$patient_id[
++   duplicated(prad_2omics$patient_id)
++ ]
+> 
+> print(prad_duplicates)
+character(0)
+> 
+> cat(
++   "Number of duplicated PRAD IDs:",
++   length(prad_duplicates),
++   "\n"
++ )
+Number of duplicated PRAD IDs: 0 
+> 
+> 
+> # ------------------------------------------------------------
+> # Verify two-omics flags
+> # ------------------------------------------------------------
+> 
+> cat("\nPRAD omics flags:\n")
+
+PRAD omics flags:
+> 
+> print(
++   table(
++     prad_2omics$has_epigenomics,
++     prad_2omics$has_transcriptomics
++   )
++ )
+      
+       TRUE
+  TRUE  187
+> 
+> 
+> # ------------------------------------------------------------
+> # Save PRAD cohort
+> # ------------------------------------------------------------
+> 
+> write.csv(
++   prad_2omics,
++   "05_FinalResults/Step5_PRAD_2omics_cohort.csv",
++   row.names = FALSE
++ )
+> 
+> saveRDS(
++   prad_2omics,
++   "05_FinalResults/Step5_PRAD_2omics_cohort.rds"
++ )
+> 
+> 
+> # ============================================================
+> # PART C — FINAL COHORT SUMMARY
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("FINAL COHORT SUMMARY\n")
+FINAL COHORT SUMMARY
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> final_cohort_summary <- data.frame(
++   Cancer = c(
++     "BRCA",
++     "PRAD"
++   ),
++   
++   Integration_Type = c(
++     "3-omics",
++     "2-omics"
++   ),
++   
++   Epigenomics = c(
++     TRUE,
++     TRUE
++   ),
++   
++   Transcriptomics = c(
++     TRUE,
++     TRUE
++   ),
++   
++   Proteomics = c(
++     TRUE,
++     FALSE
++   ),
++   
++   N_patients = c(
++     nrow(brca_3omics),
++     nrow(prad_2omics)
++   ),
++   
++   stringsAsFactors = FALSE
++ )
+> 
+> 
+> print(final_cohort_summary)
+  Cancer Integration_Type Epigenomics Transcriptomics Proteomics N_patients
+1   BRCA          3-omics        TRUE            TRUE       TRUE         31
+2   PRAD          2-omics        TRUE            TRUE      FALSE        187
+> 
+> 
+> # ------------------------------------------------------------
+> # Save summary
+> # ------------------------------------------------------------
+> 
+> write.csv(
++   final_cohort_summary,
++   "05_FinalResults/Step5_final_integration_cohort_summary.csv",
++   row.names = FALSE
++ )
+> 
+> saveRDS(
++   final_cohort_summary,
++   "05_FinalResults/Step5_final_integration_cohort_summary.rds"
++ )
+> 
+> 
+> # ============================================================
+> # PART D — SAVE JUST THE PATIENT IDs
+> # ============================================================
+> 
+> brca_3omics_ids <- brca_3omics$patient_id
+> 
+> prad_2omics_ids <- prad_2omics$patient_id
+> 
+> 
+> saveRDS(
++   brca_3omics_ids,
++   "05_FinalResults/Step5_BRCA_3omics_patient_ids.rds"
++ )
+> 
+> saveRDS(
++   prad_2omics_ids,
++   "05_FinalResults/Step5_PRAD_2omics_patient_ids.rds"
++ )
+> 
+> 
+> write.csv(
++   data.frame(patient_id = brca_3omics_ids),
++   "05_FinalResults/Step5_BRCA_3omics_patient_ids.csv",
++   row.names = FALSE
++ )
+> 
+> write.csv(
++   data.frame(patient_id = prad_2omics_ids),
++   "05_FinalResults/Step5_PRAD_2omics_patient_ids.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # FINAL CHECK
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("FINAL CHECK\n")
+FINAL CHECK
+> cat("============================================================\n")
+============================================================
+> 
+> cat(
++   "\nBRCA 3-omics patients:",
++   length(brca_3omics_ids),
++   "\n"
++ )
+
+BRCA 3-omics patients: 31 
+> 
+> cat(
++   "PRAD 2-omics patients:",
++   length(prad_2omics_ids),
++   "\n"
++ )
+PRAD 2-omics patients: 187 
+> 
+> cat(
++   "\nBRCA IDs unique:",
++   length(unique(brca_3omics_ids)) == length(brca_3omics_ids),
++   "\n"
++ )
+
+BRCA IDs unique: TRUE 
+> 
+> cat(
++   "PRAD IDs unique:",
++   length(unique(prad_2omics_ids)) == length(prad_2omics_ids),
++   "\n"
++ )
+PRAD IDs unique: TRUE 
+> 
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("STEP 5.1 COMPLETE\n")
+STEP 5.1 COMPLETE
+> cat("============================================================\n")
+============================================================

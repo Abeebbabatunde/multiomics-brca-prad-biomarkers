@@ -1,0 +1,494 @@
+# ============================================================
+> # STEP 5.0G — AUDIT HARMONIZED SAMPLE IDs
+> # ============================================================
+> 
+> # ------------------------------------------------------------
+> # 1. Load harmonized manifest
+> # ------------------------------------------------------------
+> 
+> manifest <- read.csv(
++   "00.5_clinical_metadata_harmonization/sample_manifest_harmonized.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> # ------------------------------------------------------------
+> # 2. BRCA integration candidates
+> # ------------------------------------------------------------
+> 
+> brca_manifest <- subset(
++   manifest,
++   project == "BRCA"
++ )
+> 
+> cat("\n================ BRCA MANIFEST ================\n")
+
+================ BRCA MANIFEST ================
+> 
+> cat("Total BRCA patients:", nrow(brca_manifest), "\n")
+Total BRCA patients: 803 
+> 
+> cat("All 3 omics:\n")
+All 3 omics:
+> print(table(brca_manifest$complete_omics))
+
+FALSE  TRUE 
+  772    31 
+> 
+> cat("Eligible for integration:\n")
+Eligible for integration:
+> print(table(brca_manifest$eligible_for_integration))
+
+FALSE  TRUE 
+  772    31 
+> 
+> cat("\nPatients with all 3 omics:\n")
+
+Patients with all 3 omics:
+> 
+> brca_complete <- brca_manifest[
++   brca_manifest$complete_omics == TRUE,
++ ]
+> 
+> print(
++   brca_complete[, c(
++     "patient_id",
++     "has_epigenomics",
++     "has_transcriptomics",
++     "has_proteomics",
++     "complete_omics",
++     "eligible_for_integration"
++   )]
++ )
+      patient_id has_epigenomics has_transcriptomics has_proteomics complete_omics
+3   TCGA-AR-A0TX            TRUE                TRUE           TRUE           TRUE
+30  TCGA-AR-A0TV            TRUE                TRUE           TRUE           TRUE
+104 TCGA-A2-A0YM            TRUE                TRUE           TRUE           TRUE
+126 TCGA-AR-A1AS            TRUE                TRUE           TRUE           TRUE
+137 TCGA-AR-A1AW            TRUE                TRUE           TRUE           TRUE
+155 TCGA-AO-A126            TRUE                TRUE           TRUE           TRUE
+159 TCGA-BH-A0DD            TRUE                TRUE           TRUE           TRUE
+165 TCGA-BH-A0DG            TRUE                TRUE           TRUE           TRUE
+168 TCGA-A2-A0YI            TRUE                TRUE           TRUE           TRUE
+179 TCGA-A7-A0CE            TRUE                TRUE           TRUE           TRUE
+197 TCGA-AO-A12B            TRUE                TRUE           TRUE           TRUE
+208 TCGA-AO-A0JC            TRUE                TRUE           TRUE           TRUE
+232 TCGA-A2-A0YD            TRUE                TRUE           TRUE           TRUE
+234 TCGA-AO-A12E            TRUE                TRUE           TRUE           TRUE
+249 TCGA-AR-A1AP            TRUE                TRUE           TRUE           TRUE
+274 TCGA-BH-A0E1            TRUE                TRUE           TRUE           TRUE
+290 TCGA-AR-A1AQ            TRUE                TRUE           TRUE           TRUE
+312 TCGA-AO-A0JJ            TRUE                TRUE           TRUE           TRUE
+325 TCGA-AO-A0JM            TRUE                TRUE           TRUE           TRUE
+339 TCGA-BH-A0C0            TRUE                TRUE           TRUE           TRUE
+343 TCGA-A2-A0T6            TRUE                TRUE           TRUE           TRUE
+346 TCGA-BH-A0HK            TRUE                TRUE           TRUE           TRUE
+355 TCGA-AR-A0TR            TRUE                TRUE           TRUE           TRUE
+368 TCGA-A2-A0YF            TRUE                TRUE           TRUE           TRUE
+394 TCGA-AR-A1AV            TRUE                TRUE           TRUE           TRUE
+397 TCGA-BH-A0BV            TRUE                TRUE           TRUE           TRUE
+437 TCGA-A2-A0T7            TRUE                TRUE           TRUE           TRUE
+452 TCGA-A2-A0SX            TRUE                TRUE           TRUE           TRUE
+456 TCGA-AR-A0U4            TRUE                TRUE           TRUE           TRUE
+536 TCGA-BH-A18V            TRUE                TRUE           TRUE           TRUE
+560 TCGA-A2-A0YC            TRUE                TRUE           TRUE           TRUE
+    eligible_for_integration
+3                       TRUE
+30                      TRUE
+104                     TRUE
+126                     TRUE
+137                     TRUE
+155                     TRUE
+159                     TRUE
+165                     TRUE
+168                     TRUE
+179                     TRUE
+197                     TRUE
+208                     TRUE
+232                     TRUE
+234                     TRUE
+249                     TRUE
+274                     TRUE
+290                     TRUE
+312                     TRUE
+325                     TRUE
+339                     TRUE
+343                     TRUE
+346                     TRUE
+355                     TRUE
+368                     TRUE
+394                     TRUE
+397                     TRUE
+437                     TRUE
+452                     TRUE
+456                     TRUE
+536                     TRUE
+560                     TRUE
+> 
+> 
+> # ------------------------------------------------------------
+> # 3. PRAD integration candidates
+> # ------------------------------------------------------------
+> 
+> prad_manifest <- subset(
++   manifest,
++   project == "PRAD"
++ )
+> 
+> cat("\n================ PRAD MANIFEST ================\n")
+
+================ PRAD MANIFEST ================
+> 
+> cat("Total PRAD patients:", nrow(prad_manifest), "\n")
+Total PRAD patients: 188 
+> 
+> cat("Epigenomics:\n")
+Epigenomics:
+> print(table(prad_manifest$has_epigenomics))
+
+TRUE 
+ 188 
+> 
+> cat("Transcriptomics:\n")
+Transcriptomics:
+> print(table(prad_manifest$has_transcriptomics))
+
+FALSE  TRUE 
+    1   187 
+> 
+> cat("Proteomics:\n")
+Proteomics:
+> print(table(prad_manifest$has_proteomics))
+< table of extent 0 >
+> 
+> cat("Complete omics:\n")
+Complete omics:
+> print(table(prad_manifest$complete_omics))
+
+FALSE  TRUE 
+    1   187 
+> 
+> cat("Eligible:\n")
+Eligible:
+> print(table(prad_manifest$eligible_for_integration))
+
+FALSE  TRUE 
+    1   187 
+> 
+> 
+> # ------------------------------------------------------------
+> # 4. Inspect PRAD protein metadata
+> # ------------------------------------------------------------
+> 
+> cat("\n================ PRAD PROTEIN METADATA ================\n")
+
+================ PRAD PROTEIN METADATA ================
+> 
+> prad_prot_meta <- readRDS(
++   "03_Results/Proteomics/prad_protein_metadata.rds"
++ )
+> 
+> print(class(prad_prot_meta))
+[1] "data.frame"
+> print(dim(prad_prot_meta))
+[1] 36  2
+> print(colnames(prad_prot_meta))
+[1] "sample" "group" 
+> print(prad_prot_meta)
+                                           sample            group
+1                         individual  1, neoplasm Localized_Cancer
+2  individual  1, normal tissue adjacent to tumor  Adjacent_Normal
+3                        individual  10, neoplasm Localized_Cancer
+4                        individual  11, neoplasm Localized_Cancer
+5                        individual  12, neoplasm Localized_Cancer
+6                        individual  13, neoplasm Localized_Cancer
+7                        individual  14, neoplasm Localized_Cancer
+8                        individual  15, neoplasm Localized_Cancer
+9                        individual  16, neoplasm Localized_Cancer
+10                       individual  17, neoplasm Localized_Cancer
+11                       individual  18, neoplasm Localized_Cancer
+12                       individual  19, neoplasm Localized_Cancer
+13                        individual  2, neoplasm Localized_Cancer
+14 individual  2, normal tissue adjacent to tumor  Adjacent_Normal
+15                       individual  20, neoplasm Localized_Cancer
+16                       individual  21, neoplasm Localized_Cancer
+17                       individual  22, neoplasm Localized_Cancer
+18                       individual  23, neoplasm Localized_Cancer
+19                       individual  24, neoplasm Localized_Cancer
+20                       individual  25, neoplasm Localized_Cancer
+21                       individual  26, neoplasm Localized_Cancer
+22                       individual  27, neoplasm Localized_Cancer
+23                       individual  28, neoplasm Localized_Cancer
+24                        individual  3, neoplasm Localized_Cancer
+25 individual  3, normal tissue adjacent to tumor  Adjacent_Normal
+26                        individual  4, neoplasm Localized_Cancer
+27 individual  4, normal tissue adjacent to tumor  Adjacent_Normal
+28                        individual  5, neoplasm Localized_Cancer
+29 individual  5, normal tissue adjacent to tumor  Adjacent_Normal
+30                        individual  6, neoplasm Localized_Cancer
+31 individual  6, normal tissue adjacent to tumor  Adjacent_Normal
+32                        individual  7, neoplasm Localized_Cancer
+33 individual  7, normal tissue adjacent to tumor  Adjacent_Normal
+34                        individual  8, neoplasm Localized_Cancer
+35 individual  8, normal tissue adjacent to tumor  Adjacent_Normal
+36                        individual  9, neoplasm Localized_Cancer
+> 
+> 
+> # ------------------------------------------------------------
+> # 5. Inspect PRAD protein matrix sample IDs
+> # ------------------------------------------------------------
+> 
+> cat("\n================ PRAD PROTEIN MATRIX ================\n")
+
+================ PRAD PROTEIN MATRIX ================
+> 
+> prad_prot <- readRDS(
++   "03_Results/Proteomics/prad_protein_normalized.rds"
++ )
+> 
+> cat("Dimensions:\n")
+Dimensions:
+> print(dim(prad_prot))
+[1] 5412   36
+> 
+> cat("\nProtein matrix sample IDs:\n")
+
+Protein matrix sample IDs:
+> print(colnames(prad_prot))
+ [1] "individual  1, neoplasm"                       
+ [2] "individual  1, normal tissue adjacent to tumor"
+ [3] "individual  10, neoplasm"                      
+ [4] "individual  11, neoplasm"                      
+ [5] "individual  12, neoplasm"                      
+ [6] "individual  13, neoplasm"                      
+ [7] "individual  14, neoplasm"                      
+ [8] "individual  15, neoplasm"                      
+ [9] "individual  16, neoplasm"                      
+[10] "individual  17, neoplasm"                      
+[11] "individual  18, neoplasm"                      
+[12] "individual  19, neoplasm"                      
+[13] "individual  2, neoplasm"                       
+[14] "individual  2, normal tissue adjacent to tumor"
+[15] "individual  20, neoplasm"                      
+[16] "individual  21, neoplasm"                      
+[17] "individual  22, neoplasm"                      
+[18] "individual  23, neoplasm"                      
+[19] "individual  24, neoplasm"                      
+[20] "individual  25, neoplasm"                      
+[21] "individual  26, neoplasm"                      
+[22] "individual  27, neoplasm"                      
+[23] "individual  28, neoplasm"                      
+[24] "individual  3, neoplasm"                       
+[25] "individual  3, normal tissue adjacent to tumor"
+[26] "individual  4, neoplasm"                       
+[27] "individual  4, normal tissue adjacent to tumor"
+[28] "individual  5, neoplasm"                       
+[29] "individual  5, normal tissue adjacent to tumor"
+[30] "individual  6, neoplasm"                       
+[31] "individual  6, normal tissue adjacent to tumor"
+[32] "individual  7, neoplasm"                       
+[33] "individual  7, normal tissue adjacent to tumor"
+[34] "individual  8, neoplasm"                       
+[35] "individual  8, normal tissue adjacent to tumor"
+[36] "individual  9, neoplasm"                       
+> 
+> 
+> # ------------------------------------------------------------
+> # 6. Inspect PRAD raw proteomics group information
+> # ------------------------------------------------------------
+> 
+> cat("\n================ PRAD PROTEOMICS GROUPS ================\n")
+
+================ PRAD PROTEOMICS GROUPS ================
+> 
+> prad_prot_groups <- readRDS(
++   "01_RawData/Prostate/prad_prot_groups.rds"
++ )
+> 
+> print(class(prad_prot_groups))
+[1] "character"
+> print(length(prad_prot_groups))
+[1] 110
+> print(prad_prot_groups)
+  [1] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+  [4] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+  [7] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [10] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [13] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [16] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [19] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [22] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [25] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [28] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [31] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [34] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [37] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [40] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [43] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [46] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [49] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [52] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [55] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [58] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [61] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [64] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [67] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [70] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [73] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [76] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [79] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [82] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [85] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [88] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [91] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [94] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+ [97] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+[100] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+[103] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+[106] "EarlyProstateCancer" "EarlyProstateCancer" "EarlyProstateCancer"
+[109] "EarlyProstateCancer" "EarlyProstateCancer"
+> 
+> 
+> # ------------------------------------------------------------
+> # 7. Compare PRAD protein IDs against PRAD clinical IDs
+> # ------------------------------------------------------------
+> 
+> cat("\n================ PRAD ID COMPARISON ================\n")
+
+================ PRAD ID COMPARISON ================
+> 
+> clinical_prad <- read.csv(
++   "01_RawData/Prostate/clinical_prad.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> cat("Clinical PRAD rows:", nrow(clinical_prad), "\n")
+Clinical PRAD rows: 188 
+> 
+> cat("\nClinical ID columns:\n")
+
+Clinical ID columns:
+> print(colnames(clinical_prad)[
++   grepl(
++     "submitter|patient|barcode|case|sample",
++     colnames(clinical_prad),
++     ignore.case = TRUE
++   )
++ ])
+[1] "submitter_id"        "bcr_patient_barcode"
+> 
+> cat("\nFirst clinical IDs:\n")
+
+First clinical IDs:
+> 
+> if ("submitter_id" %in% colnames(clinical_prad)) {
++   print(head(clinical_prad$submitter_id, 20))
++ }
+ [1] "TCGA-XK-AAK1" "TCGA-HC-7748" "TCGA-EJ-A46H" "TCGA-EJ-7791" "TCGA-EJ-7123"
+ [6] "TCGA-CH-5790" "TCGA-KC-A4BL" "TCGA-HC-8259" "TCGA-KK-A8IM" "TCGA-EJ-5525"
+[11] "TCGA-HC-8213" "TCGA-J4-A83M" "TCGA-VN-A88P" "TCGA-KC-A4BN" "TCGA-J4-8200"
+[16] "TCGA-J4-A83K" "TCGA-EJ-A7NJ" "TCGA-SU-A7E7" "TCGA-KK-A6E3" "TCGA-WW-A8ZI"
+> 
+> # ------------------------------------------------------------
+> # 8. Check whether protein sample names resemble
+> #    patient IDs after common formatting
+> # ------------------------------------------------------------
+> 
+> protein_ids <- colnames(prad_prot)
+> 
+> cat("\nProtein IDs:\n")
+
+Protein IDs:
+> print(protein_ids)
+ [1] "individual  1, neoplasm"                       
+ [2] "individual  1, normal tissue adjacent to tumor"
+ [3] "individual  10, neoplasm"                      
+ [4] "individual  11, neoplasm"                      
+ [5] "individual  12, neoplasm"                      
+ [6] "individual  13, neoplasm"                      
+ [7] "individual  14, neoplasm"                      
+ [8] "individual  15, neoplasm"                      
+ [9] "individual  16, neoplasm"                      
+[10] "individual  17, neoplasm"                      
+[11] "individual  18, neoplasm"                      
+[12] "individual  19, neoplasm"                      
+[13] "individual  2, neoplasm"                       
+[14] "individual  2, normal tissue adjacent to tumor"
+[15] "individual  20, neoplasm"                      
+[16] "individual  21, neoplasm"                      
+[17] "individual  22, neoplasm"                      
+[18] "individual  23, neoplasm"                      
+[19] "individual  24, neoplasm"                      
+[20] "individual  25, neoplasm"                      
+[21] "individual  26, neoplasm"                      
+[22] "individual  27, neoplasm"                      
+[23] "individual  28, neoplasm"                      
+[24] "individual  3, neoplasm"                       
+[25] "individual  3, normal tissue adjacent to tumor"
+[26] "individual  4, neoplasm"                       
+[27] "individual  4, normal tissue adjacent to tumor"
+[28] "individual  5, neoplasm"                       
+[29] "individual  5, normal tissue adjacent to tumor"
+[30] "individual  6, neoplasm"                       
+[31] "individual  6, normal tissue adjacent to tumor"
+[32] "individual  7, neoplasm"                       
+[33] "individual  7, normal tissue adjacent to tumor"
+[34] "individual  8, neoplasm"                       
+[35] "individual  8, normal tissue adjacent to tumor"
+[36] "individual  9, neoplasm"                       
+> 
+> if ("submitter_id" %in% colnames(clinical_prad)) {
++   
++   clinical_ids <- clinical_prad$submitter_id
++   
++   # Normalize common TCGA punctuation differences
++   protein_patient_ids <- gsub(
++     "\\.",
++     "-",
++     protein_ids
++   )
++   
++   protein_patient_ids <- sub(
++     "-[0-9]{2}[A-Z].*$",
++     "",
++     protein_patient_ids
++   )
++   
++   clinical_ids_clean <- gsub(
++     "\\.",
++     "-",
++     clinical_ids
++   )
++   
++   cat("\nNormalized protein IDs:\n")
++   print(protein_patient_ids)
++   
++   cat("\nNumber of direct patient-ID matches:\n")
++   
++   matches <- protein_patient_ids[
++     protein_patient_ids %in% clinical_ids_clean
++   ]
++   
++   print(length(matches))
++   
++   cat("\nMatched IDs:\n")
++   print(matches)
++ }
+
+Normalized protein IDs:
+ [1] "individual  1, neoplasm"                       
+ [2] "individual  1, normal tissue adjacent to tumor"
+ [3] "individual  10, neoplasm"                      
+ [4] "individual  11, neoplasm"                      
+ [5] "individual  12, neoplasm"                      
+ [6] "individual  13, neoplasm"                      
+ [7] "individual  14, neoplasm"                      
+ [8] "individual  15, neoplasm"                      
+ [9] "individual  16, neoplasm"                      
+[10] "individual  17, neoplasm"                      
+[11] "individual  18, neoplasm"                      
+[12] "individual  19, neoplasm"                      
+[13] "individual  2, neoplasm"                       
+[14] "individual  2, normal tissue adjacent to tumor"
+[15] "individual  20, neoplasm"              

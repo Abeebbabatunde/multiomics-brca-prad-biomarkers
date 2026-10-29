@@ -1,0 +1,119 @@
+>   # ================================================
+> # DIAGNOSE WHY VALUES ARE NA
+> # ================================================
+> 
+> cat("========================================\n")
+========================================
+> cat("   DIAGNOSING NA PROBLEM\n")
+   DIAGNOSING NA PROBLEM
+> cat("========================================\n\n")
+========================================
+
+> 
+> f1 <- "01_RawData/Breast/brca_metabolites_raw.csv"
+> 
+> # -----------------------------------------------
+> # CHECK 1: Read raw lines of the CSV
+> # -----------------------------------------------
+> cat("CHECK 1: Raw file content...\n\n")
+CHECK 1: Raw file content...
+
+> 
+> raw_lines <- readLines(f1, n = 5)
+> 
+> for(i in seq_along(raw_lines)){
++   cat(sprintf("Line %d:\n%s\n\n",
++               i,
++               substr(raw_lines[i], 1, 300)))
++ }
+Line 1:
+"","MB_39","HCB_15","MB_35","HCB_16","MB_36","HCB_17","MB_37","HCB_18","MB_38","HCB_11","MB_31","HCB_12","MB_32","HCB_13","MB_33","HCB_14","MB_34","HCB_10","MB_30","MB_1","MB_6","MB_7","MB_8","MB_9","MB_2","MB_3","MB_4","MB_5","MB_46","MB_47","MB_48","MB_49","MB_42","MB_43","MB_44","MB_45","MB_40","
+
+Line 2:
+"Serum_LCMS_Aminoadipate",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,N
+
+Line 3:
+"Serum_LCMS_Ascorbic acid",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+
+Line 4:
+"Serum_LCMS_Tryptophan",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+
+Line 5:
+"Serum_LCMS_Phenylalanine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+
+> 
+> # -----------------------------------------------
+> # CHECK 2: File size
+> # -----------------------------------------------
+> cat(sprintf("File size: %.4f MB\n\n",
++             file.size(f1)/1024/1024))
+File size: 0.0138 MB
+
+> 
+> # -----------------------------------------------
+> # CHECK 3: Try different loading methods
+> # -----------------------------------------------
+> cat("CHECK 3: Trying different load methods...\n\n")
+CHECK 3: Trying different load methods...
+
+> 
+> # Method A: read.csv default
+> cat("Method A: read.csv...\n")
+Method A: read.csv...
+> dat_a <- read.csv(f1, row.names=1,
++                   check.names=FALSE)
+> cat(sprintf("  Rows: %d  Cols: %d\n",
++             nrow(dat_a), ncol(dat_a)))
+  Rows: 39  Cols: 108
+> cat(sprintf("  NAs : %d\n",
++             sum(is.na(dat_a))))
+  NAs : 4212
+> if(nrow(dat_a) > 0 & ncol(dat_a) > 0){
++   cat("  First value:", dat_a[1,1], "\n\n")
++ }
+  First value: NA 
+
+> 
+> # Method B: read.table tab separated
+> cat("Method B: read.table tab...\n")
+Method B: read.table tab...
+> dat_b <- tryCatch({
++   read.table(f1, header=TRUE, sep="\t",
++              row.names=1, check.names=FALSE)
++ }, error=function(e) NULL)
+> if(!is.null(dat_b)){
++   cat(sprintf("  Rows: %d  Cols: %d\n",
++               nrow(dat_b), ncol(dat_b)))
++   cat(sprintf("  NAs : %d\n",
++               sum(is.na(dat_b))))
++   if(nrow(dat_b) > 0 & ncol(dat_b) > 0){
++     cat("  First value:", dat_b[1,1], "\n\n")
++   }
++ } else {
++   cat("  Failed\n\n")
++ }
+  Rows: 39  Cols: 0
+  NAs : 0
+> 
+> # Method C: read.table comma separated
+> cat("Method C: read.table comma...\n")
+Method C: read.table comma...
+> dat_c <- tryCatch({
++   read.table(f1, header=TRUE, sep=",",
++              row.names=1, check.names=FALSE,
++              fill=TRUE)
++ }, error=function(e) NULL)
+> if(!is.null(dat_c)){
++   cat(sprintf("  Rows: %d  Cols: %d\n",
++               nrow(dat_c), ncol(dat_c)))
++   cat(sprintf("  NAs : %d\n",
++               sum(is.na(dat_c))))
++   if(nrow(dat_c) > 0 & ncol(dat_c) > 0){
++     cat("  First value:", dat_c[1,1], "\n\n")
++   }
++ } else {
++   cat("  Failed\n\n")
++ }
+  Rows: 39  Cols: 108
+  NAs : 4212
+  First value: NA

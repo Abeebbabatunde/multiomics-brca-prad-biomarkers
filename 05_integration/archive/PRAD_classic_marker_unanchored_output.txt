@@ -1,0 +1,117 @@
+dmp <- fread("03_Results/Epigenomics/prad_DMPs.csv")
+> ann <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
+> dmp$gene <- ann[match(dmp$probe_id, rownames(ann)), "UCSC_RefGene_Name"]
+> classic <- c("GSTP1","RASSF1","APC","PTGS2")
+> for (g in classic) {
++   hits <- dmp[grepl(g, dmp$gene), c("probe_id","logFC","adj.P.Val","gene")]
++   cat("\n", g, ":\n"); print(hits)
++ }
+
+ GSTP1 :
+     probe_id    logFC    adj.P.Val        gene
+       <char>    <num>        <num>      <char>
+1: cg26250609 2.599998 4.262057e-28 GSTP1;GSTP1
+2: cg04920951 4.231592 9.193838e-28 GSTP1;GSTP1
+3: cg06928838 3.697477 1.794169e-26       GSTP1
+4: cg09038676 3.546387 7.196765e-25       GSTP1
+5: cg11566244 3.188616 1.358263e-22       GSTP1
+6: cg02659086 4.238342 5.218145e-22       GSTP1
+7: cg22224704 1.957242 1.682167e-17       GSTP1
+
+ RASSF1 :
+      probe_id      logFC    adj.P.Val                               gene
+        <char>      <num>        <num>                             <char>
+ 1: cg08148891  2.2003837 1.621588e-16                            RASSF10
+ 2: cg04743654  3.0017817 3.691388e-16        RASSF1;RASSF1;RASSF1;RASSF1
+ 3: cg05817758  2.4208925 1.868873e-15                            RASSF10
+ 4: cg20098471  3.8055400 2.723946e-15                            RASSF10
+ 5: cg12966367  1.6429151 3.936767e-15                      RASSF1;RASSF1
+ 6: cg21554552  1.7572997 1.397654e-14                      RASSF1;RASSF1
+ 7: cg27569446  1.6403620 8.324526e-12                      RASSF1;RASSF1
+ 8: cg04540383  2.0064224 1.462847e-11              RASSF1;RASSF1;ZMYND10
+ 9: cg25747192  1.4351521 5.632806e-11                      RASSF1;RASSF1
+10: cg00777121  1.3696255 8.476826e-11                      RASSF1;RASSF1
+11: cg06174454 -1.3359062 1.263478e-10        RASSF1;RASSF1;RASSF1;RASSF1
+12: cg09596429  1.4492454 5.474112e-10                            RASSF10
+13: cg25486143  1.4475993 5.701837e-10                      RASSF1;RASSF1
+14: cg08047457  1.1814000 9.209294e-10                      RASSF1;RASSF1
+15: cg03297783  1.1666111 2.327018e-09              RASSF1;RASSF1;ZMYND10
+16: cg08876434  2.1194470 1.549574e-08                            RASSF10
+17: cg00980904 -1.2556865 2.356964e-07        RASSF1;RASSF1;RASSF1;RASSF1
+18: cg06172942  0.8175249 5.283417e-07                      RASSF1;RASSF1
+19: cg25344734  1.2183645 8.744079e-06                            RASSF10
+20: cg20918243  1.0802042 8.852503e-06                            RASSF10
+21: cg07600636  1.0281810 5.844022e-05                            RASSF10
+22: cg19811994 -0.8666696 7.894382e-05        RASSF1;RASSF1;RASSF1;RASSF1
+23: cg02930432  0.8623621 2.008605e-03        RASSF1;RASSF1;RASSF1;RASSF1
+24: cg07130266  0.7369803 2.240519e-03 RASSF1;RASSF1;RASSF1;RASSF1;RASSF1
+25: cg09386807  0.7130168 2.589316e-03        RASSF1;RASSF1;RASSF1;RASSF1
+      probe_id      logFC    adj.P.Val                               gene
+        <char>      <num>        <num>                             <char>
+
+ APC :
+      probe_id      logFC    adj.P.Val                gene
+        <char>      <num>        <num>              <char>
+ 1: cg03804500 -2.4999074 7.591839e-20        ANAPC2;SSNA1
+ 2: cg19264571  1.6886039 1.129513e-16              APCDD1
+ 3: cg23938220  3.6584365 2.211995e-16         APC;APC;APC
+ 4: cg06825512  2.2218635 4.395572e-16              APCDD1
+ 5: cg20311501  3.0629319 7.725609e-16         APC;APC;APC
+ 6: cg27291231 -1.6320934 1.213657e-15        ANAPC2;SSNA1
+ 7: cg03667968  4.8133403 1.732532e-15         APC;APC;APC
+ 8: cg16970232  3.4416290 8.801079e-15         APC;APC;APC
+ 9: cg15020645  2.8597693 1.036198e-14         APC;APC;APC
+10: cg12534150  4.0018243 4.008218e-14 APC;APC;APC;APC;APC
+11: cg00577935  3.3990179 4.156128e-14         APC;APC;APC
+12: cg14479889  3.2305520 4.924277e-14         APC;APC;APC
+13: cg08571859  3.2082971 1.627887e-13         APC;APC;APC
+14: cg07402669  2.9583295 1.726832e-13             APCDD1L
+15: cg13580382 -1.3375394 2.817050e-13              ANAPC2
+16: cg21291134 -2.9172797 3.460685e-13                APCS
+17: cg14511739  4.3231733 3.726055e-13         APC;APC;APC
+18: cg22035501  4.3355416 6.078539e-13         APC;APC;APC
+19: cg24332422  2.0765345 2.391102e-12         APC;APC;APC
+20: cg02511809  1.9633688 3.767625e-12         APC;APC;APC
+21: cg00336800  1.4607254 9.759527e-12                APC2
+22: cg24115032  1.4962720 1.012470e-11             APCDD1L
+23: cg11613015  3.6575137 5.007543e-11         APC;APC;APC
+24: cg05919685 -1.9540968 5.579060e-11                APCS
+25: cg23487201  1.5559657 6.727364e-11             APCDD1L
+26: cg25611723  1.1305508 1.087634e-10              APCDD1
+27: cg20600210  2.7147399 1.577096e-10             APCDD1L
+28: cg21253087 -2.1627670 2.161406e-10              SNAPC4
+29: cg03357077 -0.8288144 4.809042e-10              SNAPC5
+30: cg04203646  1.6125587 8.772304e-10                APC2
+31: cg13778709  1.4070890 5.540378e-09             APCDD1L
+32: cg26353877 -1.8678847 6.645430e-09                APCS
+33: cg03856044 -1.1999109 2.366362e-08           APCS;APCS
+34: cg01240931  0.8083441 3.470213e-08         APC;APC;APC
+35: cg16330965 -1.1254449 3.854723e-08              SNAPC5
+36: cg16451027 -1.3397622 4.863966e-08                 APC
+37: cg05457563  1.0693909 2.089910e-07                APC2
+38: cg14546153  1.3328923 3.751085e-07             APCDD1L
+39: cg15709766  0.8514380 4.861136e-07                APC2
+40: cg05620923  1.1472014 5.480460e-07                APC2
+41: cg10169241  1.3668240 5.697679e-07                APC2
+42: cg23418591  1.2514811 8.804886e-07             APCDD1L
+43: cg24156854  0.8528275 1.740387e-05              SNAPC2
+44: cg14724471  0.8985418 1.776874e-05             APCDD1L
+45: cg16110711 -0.8971891 2.169909e-05                 APC
+46: cg18208602  1.2612545 4.738101e-05              APCDD1
+47: cg06703803  1.0403678 6.407903e-05              ANAPC7
+48: cg18133957  0.8852084 7.616758e-04                APC2
+49: cg13918811  0.7657346 1.139825e-03              ANAPC4
+50: cg13968061 -1.0897198 2.151977e-03                APCS
+      probe_id      logFC    adj.P.Val                gene
+        <char>      <num>        <num>              <char>
+
+ PTGS2 :
+     probe_id    logFC    adj.P.Val   gene
+       <char>    <num>        <num> <char>
+1: cg25147026 2.055231 3.492942e-11  PTGS2
+2: cg25837803 3.478113 8.295857e-11  PTGS2
+3: cg23070111 1.907001 5.850759e-07  PTGS2
+4: cg09461185 1.987695 6.969960e-07  PTGS2
+5: cg17419623 1.648741 7.678560e-06  PTGS2
+6: cg10180406 1.340285 1.681392e-05  PTGS2
+7: cg24887140 1.528786 1.936332e-05  PTGS2

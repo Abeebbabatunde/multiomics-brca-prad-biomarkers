@@ -1,0 +1,110 @@
+STEP 4: Sample type breakdown
+> 
+> # Common column names across CPTAC studies in cBioPortal
+> type_cols <- grep("SAMPLE_TYPE|TUMOR_TISSUE|SPECIMEN_TYPE", 
++                   colnames(clinical_sample), ignore.case = TRUE, value = TRUE)
+> cat("Detected sample-type-like columns:", paste(type_cols, collapse = ", "), "\n")
+Detected sample-type-like columns:  
+> 
+> if (length(type_cols) > 0) {
++   for (col in type_cols) {
++     cat("\n--- Table for column:", col, "---\n")
++     print(table(clinical_sample[[col]], useNA = "always"))
++   }
++ } else {
++   cat("No obvious sample type column found — inspect colnames manually above.\n")
++ }
+No obvious sample type column found — inspect colnames manually above.
+> 
+> # ---- 5. Search for stage info (early vs late) ----
+> cat("\nSTEP 5: Tumor stage breakdown\n")
+
+STEP 5: Tumor stage breakdown
+> 
+> stage_cols_sample <- grep("STAGE", colnames(clinical_sample), ignore.case = TRUE, value = TRUE)
+> stage_cols_patient <- grep("STAGE", colnames(clinical_patient), ignore.case = TRUE, value = TRUE)
+> 
+> cat("Stage columns in SAMPLE file:", paste(stage_cols_sample, collapse = ", "), "\n")
+Stage columns in SAMPLE file: TUMOR_STAGE 
+> cat("Stage columns in PATIENT file:", paste(stage_cols_patient, collapse = ", "), "\n")
+Stage columns in PATIENT file:  
+> 
+> if (length(stage_cols_sample) > 0) {
++   for (col in stage_cols_sample) {
++     cat("\n--- SAMPLE file:", col, "---\n")
++     print(table(clinical_sample[[col]], useNA = "always"))
++   }
++ }
+
+--- SAMPLE file: TUMOR_STAGE ---
+
+  Stage IA  Stage IIA  Stage IIB  Stage III Stage IIIA Stage IIIB Stage IIIC 
+         4         50         20          4         22          3          4 
+      <NA> 
+        15 
+> 
+> if (length(stage_cols_patient) > 0) {
++   for (col in stage_cols_patient) {
++     cat("\n--- PATIENT file:", col, "---\n")
++     print(table(clinical_patient[[col]], useNA = "always"))
++   }
++ }
+> 
+> # ---- 6. Flag early-stage vs normal samples explicitly ----
+> cat("\nSTEP 6: Early-stage cancer & Normal sample flagging\n")
+
+STEP 6: Early-stage cancer & Normal sample flagging
+> 
+> # Adjust these patterns based on what STEP 5 actually prints
+> early_stage_pattern  <- "Stage I$|Stage IA|Stage IB|Stage II$|Stage IIA|Stage IIB"
+> normal_pattern        <- "Normal|normal|NAT|Adjacent"
+> 
+> if (length(stage_cols_patient) > 0) {
++   stage_col <- stage_cols_patient[1]
++   clinical_patient$stage_group <- ifelse(
++     grepl(early_stage_pattern, clinical_patient[[stage_col]], ignore.case = TRUE),
++     "Early",
++     ifelse(grepl("Stage III|Stage IV", clinical_patient[[stage_col]], ignore.case = TRUE),
++            "Late", "Unknown/Other")
++   )
++   cat("\nEarly vs Late vs Unknown stage counts:\n")
++   print(table(clinical_patient$stage_group, useNA = "always"))
++ }
+> 
+> if (length(type_cols) > 0) {
++   type_col <- type_cols[1]
++   n_normal <- sum(grepl(normal_pattern, clinical_sample[[type_col]], ignore.case = TRUE), na.rm = TRUE)
++   cat("\nNumber of samples matching 'Normal' pattern:", n_normal, "\n")
++ }
+> 
+> # ---- 7. Cross-check omics matrices match clinical sample IDs ----
+> cat("\nSTEP 7: Cross-check sample ID overlap with omics data\n")
+
+STEP 7: Cross-check sample ID overlap with omics data
+> 
+> protein_path <- file.path(base_dir, "data_protein_quantification.txt")
+> protein_header <- readLines(protein_path, n = 1)
+> protein_samples <- strsplit(protein_header, "\t")[[1]]
+> protein_samples <- protein_samples[-1]  # drop first col (gene/protein ID)
+> 
+> clinical_ids <- clinical_sample[[grep("SAMPLE_ID", colnames(clinical_sample), 
++                                       ignore.case = TRUE, value = TRUE)[1]]]
+> 
+> overlap <- intersect(protein_samples, clinical_ids)
+> cat("Protein matrix samples:", length(protein_samples), "\n")
+Protein matrix samples: 122 
+> cat("Clinical sample IDs:", length(clinical_ids), "\n")
+Clinical sample IDs: 122 
+> cat("Overlapping IDs:", length(overlap), "\n")
+Overlapping IDs: 122 
+> 
+> if (length(overlap) == 0) {
++   cat("⚠️  WARNING: No overlap — check ID formatting (e.g. dashes vs dots, prefixes)\n")
++ } else {
++   cat("✅ Sample IDs align between protein matrix and clinical metadata\n")
++ }
+✅ Sample IDs align between protein matrix and clinical metadata
+> 
+> cat("\n=== QC CHECK COMPLETE ===\n")
+
+=== QC CHECK COMPLETE ===

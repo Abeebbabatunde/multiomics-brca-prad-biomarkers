@@ -1,0 +1,352 @@
+print(clinical_rds)
+[1] "./01_RawData/Breast/brca_meth_meta_minimal.rds"       
+[2] "./01_RawData/Breast/brca_rna_clinical_full.rds"       
+[3] "./01_RawData/Breast/brca_rna_meta_minimal.rds"        
+[4] "./02_ProcessedData/Breast/brca_meth_clinical_full.rds"
+[5] "./02_ProcessedData/Breast/brca_meth_meta_aligned.rds" 
+[6] "./03_Results/Proteomics/prad_protein_metadata.rds"    
+> 
+> 
+> # ------------------------------------------------------------
+> # 3. Find CSV files
+> # ------------------------------------------------------------
+> 
+> all_csv <- list.files(
++   ".",
++   pattern = "\\.csv$",
++   recursive = TRUE,
++   full.names = TRUE,
++   ignore.case = TRUE
++ )
+> 
+> clinical_csv <- all_csv[
++   grepl(
++     "clinical|harmon|metadata|meta|sample",
++     all_csv,
++     ignore.case = TRUE
++   )
++ ]
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("CLINICAL / HARMONIZED CSV FILES\n")
+CLINICAL / HARMONIZED CSV FILES
+> cat("============================================================\n")
+============================================================
+> 
+> print(clinical_csv)
+ [1] "./00.5_clinical_metadata_harmonization/attrition_report.csv"          
+ [2] "./00.5_clinical_metadata_harmonization/sample_manifest_harmonized.csv"
+ [3] "./01_RawData/Breast/brca_meth_meta.csv"                               
+ [4] "./01_RawData/Breast/brca_prot_meta.csv"                               
+ [5] "./01_RawData/Breast/brca_prot_meta_full.csv"                          
+ [6] "./01_RawData/Breast/brca_protein_sample_pairing.csv"                  
+ [7] "./01_RawData/Breast/brca_rna_meta.csv"                                
+ [8] "./01_RawData/Breast/clinical_brca.csv"                                
+ [9] "./01_RawData/Prostate/clinical_prad.csv"                              
+[10] "./01_RawData/Prostate/prad_metabolites_meta.csv"                      
+[11] "./01_RawData/Prostate/prad_metabolites_raw.csv"                       
+[12] "./01_RawData/Prostate/prad_prot_meta.csv"                             
+[13] "./01_RawData/Prostate/prad_rna_meta.csv"                              
+[14] "./02_ProcessedData/Prostate/prad_metabolites_meta.csv"                
+[15] "./02_ProcessedData/Prostate/prad_metabolites_normalized.csv"          
+[16] "./02_ProcessedData/Prostate/prad_rna_meta.csv"                        
+[17] "./03_Results/Metabolomics/breast_metabolomics_exclusion_note.csv"     
+> 
+> 
+> # ------------------------------------------------------------
+> # 4. Find TSV/TXT files
+> # ------------------------------------------------------------
+> 
+> all_txt <- list.files(
++   ".",
++   pattern = "\\.(txt|tsv)$",
++   recursive = TRUE,
++   full.names = TRUE,
++   ignore.case = TRUE
++ )
+> 
+> clinical_txt <- all_txt[
++   grepl(
++     "clinical|harmon|metadata|meta|sample",
++     all_txt,
++     ignore.case = TRUE
++   )
++ ]
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("CLINICAL / HARMONIZED TXT/TSV FILES\n")
+CLINICAL / HARMONIZED TXT/TSV FILES
+> cat("============================================================\n")
+============================================================
+> 
+> print(clinical_txt)
+character(0)
+> 
+> 
+> # ------------------------------------------------------------
+> # 5. Save the search results
+> # ------------------------------------------------------------
+> 
+> dir.create(
++   "05_FinalResults",
++   showWarnings = FALSE,
++   recursive = TRUE
++ )
+> 
+> writeLines(
++   clinical_scripts,
++   "05_FinalResults/Step5_clinical_harmonization_scripts.txt"
++ )
+> 
+> writeLines(
++   clinical_rds,
++   "05_FinalResults/Step5_clinical_harmonization_RDS.txt"
++ )
+> 
+> writeLines(
++   clinical_csv,
++   "05_FinalResults/Step5_clinical_harmonization_CSV.txt"
++ )
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("SEARCH COMPLETE\n")
+SEARCH COMPLETE
+> cat("============================================================\n")
+============================================================
+> # ============================================================
+> # STEP 5.0F — INSPECT CLINICAL HARMONIZATION OUTPUTS
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("1. HARMONIZED SAMPLE MANIFEST\n")
+1. HARMONIZED SAMPLE MANIFEST
+> cat("============================================================\n")
+============================================================
+> 
+> manifest <- read.csv(
++   "00.5_clinical_metadata_harmonization/sample_manifest_harmonized.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> cat("Dimensions:\n")
+Dimensions:
+> print(dim(manifest))
+[1] 991  14
+> 
+> cat("\nColumn names:\n")
+
+Column names:
+> print(colnames(manifest))
+ [1] "patient_id"               "has_epigenomics"         
+ [3] "has_transcriptomics"      "has_proteomics"          
+ [5] "project"                  "ajcc_pathologic_stage"   
+ [7] "tumor_grade"              "vital_status"            
+ [9] "days_to_death"            "days_to_last_follow_up"  
+[11] "gleason_score"            "complete_omics"          
+[13] "complete_clinical"        "eligible_for_integration"
+> 
+> cat("\nFirst 10 rows:\n")
+
+First 10 rows:
+> print(head(manifest, 10))
+     patient_id has_epigenomics has_transcriptomics has_proteomics project
+1  TCGA-A7-A0DC            TRUE                TRUE          FALSE    BRCA
+2  TCGA-E9-A5FL            TRUE                TRUE          FALSE    BRCA
+3  TCGA-AR-A0TX            TRUE                TRUE           TRUE    BRCA
+4  TCGA-C8-A1HK            TRUE                TRUE          FALSE    BRCA
+5  TCGA-B6-A0RL            TRUE                TRUE          FALSE    BRCA
+6  TCGA-D8-A1JK            TRUE                TRUE          FALSE    BRCA
+7  TCGA-AC-A6NO            TRUE                TRUE          FALSE    BRCA
+8  TCGA-EW-A6S9            TRUE                TRUE          FALSE    BRCA
+9  TCGA-AC-A8OS            TRUE                TRUE          FALSE    BRCA
+10 TCGA-E9-A5UO            TRUE                TRUE          FALSE    BRCA
+   ajcc_pathologic_stage  tumor_grade vital_status days_to_death
+1               Stage IA Not Reported        Alive            NA
+2              Stage IIB         <NA>        Alive            NA
+3              Stage IIA         <NA>        Alive            NA
+4              Stage IIB         <NA>        Alive            NA
+5              Stage IIA         <NA>         Dead          2469
+6              Stage IIA         <NA>        Alive            NA
+7              Stage IIB         <NA>        Alive            NA
+8              Stage IIA         <NA>        Alive            NA
+9              Stage IIA         <NA>        Alive            NA
+10             Stage IIA         <NA>        Alive            NA
+   days_to_last_follow_up gleason_score complete_omics complete_clinical
+1                      NA            NA          FALSE              TRUE
+2                      24            NA          FALSE              TRUE
+3                    1972            NA           TRUE              TRUE
+4                     366            NA          FALSE              TRUE
+5                    2469            NA          FALSE              TRUE
+6                       0            NA          FALSE              TRUE
+7                      51            NA          FALSE              TRUE
+8                     463            NA          FALSE              TRUE
+9                      70            NA          FALSE              TRUE
+10                    785            NA          FALSE              TRUE
+   eligible_for_integration
+1                     FALSE
+2                     FALSE
+3                      TRUE
+4                     FALSE
+5                     FALSE
+6                     FALSE
+7                     FALSE
+8                     FALSE
+9                     FALSE
+10                    FALSE
+> 
+> 
+> # ============================================================
+> # 2. ATTRITION REPORT\n# ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("2. ATTRITION REPORT\n")
+2. ATTRITION REPORT
+> cat("============================================================\n")
+============================================================
+> 
+> attrition <- read.csv(
++   "00.5_clinical_metadata_harmonization/attrition_report.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> cat("Dimensions:\n")
+Dimensions:
+> print(dim(attrition))
+[1] 2 8
+> 
+> cat("\nColumn names:\n")
+
+Column names:
+> print(colnames(attrition))
+[1] "project"                  "total"                    "has_epi"                 
+[4] "has_txn"                  "has_prot"                 "complete_omics"          
+[7] "complete_clinical"        "eligible_for_integration"
+> 
+> cat("\nFull attrition report:\n")
+
+Full attrition report:
+> print(attrition)
+  project total has_epi has_txn has_prot complete_omics complete_clinical
+1    BRCA   803     570     801       76             31               803
+2    PRAD   188     188     187        0            187               188
+  eligible_for_integration
+1                       31
+2                      187
+> 
+> 
+> # ============================================================
+> # 3. BRCA PROTEIN SAMPLE PAIRING\n# ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("3. BRCA PROTEIN SAMPLE PAIRING\n")
+3. BRCA PROTEIN SAMPLE PAIRING
+> cat("============================================================\n")
+============================================================
+> 
+> brca_pairing <- read.csv(
++   "01_RawData/Breast/brca_protein_sample_pairing.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> cat("Dimensions:\n")
+Dimensions:
+> print(dim(brca_pairing))
+[1] 60  3
+> 
+> cat("\nColumn names:\n")
+
+Column names:
+> print(colnames(brca_pairing))
+[1] "patient_id"     "sample_barcode" "sample_type"   
+> 
+> cat("\nFirst 20 rows:\n")
+
+First 20 rows:
+> print(head(brca_pairing, 20))
+     patient_id   sample_barcode   sample_type
+1  TCGA-E9-A1N6 TCGA-E9-A1N6-01A Primary Tumor
+2  TCGA-BH-A18N TCGA-BH-A18N-01A Primary Tumor
+3  TCGA-BH-A208 TCGA-BH-A208-01A Primary Tumor
+4  TCGA-E9-A1RB TCGA-E9-A1RB-01A Primary Tumor
+5  TCGA-BH-A0E1 TCGA-BH-A0E1-01A Primary Tumor
+6  TCGA-E9-A1N9 TCGA-E9-A1N9-01A Primary Tumor
+7  TCGA-E9-A1N5 TCGA-E9-A1N5-01A Primary Tumor
+8  TCGA-BH-A1ET TCGA-BH-A1ET-01A Primary Tumor
+9  TCGA-BH-A0AY TCGA-BH-A0AY-01A Primary Tumor
+10 TCGA-BH-A1EY TCGA-BH-A1EY-01A Primary Tumor
+11 TCGA-A7-A4SA TCGA-A7-A4SA-01A Primary Tumor
+12 TCGA-E9-A1NG TCGA-E9-A1NG-01A Primary Tumor
+13 TCGA-A7-A4SE TCGA-A7-A4SE-01A Primary Tumor
+14 TCGA-BH-A0B7 TCGA-BH-A0B7-01A Primary Tumor
+15 TCGA-BH-A18P TCGA-BH-A18P-01A Primary Tumor
+16 TCGA-BH-A1FN TCGA-BH-A1FN-01A Primary Tumor
+17 TCGA-BH-A0HK TCGA-BH-A0HK-01A Primary Tumor
+18 TCGA-E9-A1ND TCGA-E9-A1ND-01A Primary Tumor
+19 TCGA-BH-A18R TCGA-BH-A18R-01A Primary Tumor
+20 TCGA-BH-A203 TCGA-BH-A203-01A Primary Tumor
+> 
+> 
+> # ============================================================
+> # 4. BRCA PROTEOMICS METADATA\n# ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("4. BRCA PROTEOMICS METADATA\n")
+4. BRCA PROTEOMICS METADATA
+> cat("============================================================\n")
+============================================================
+> 
+> brca_prot_meta_csv <- read.csv(
++   "01_RawData/Breast/brca_prot_meta_full.csv",
++   stringsAsFactors = FALSE,
++   check.names = FALSE
++ )
+> 
+> cat("Dimensions:\n")
+Dimensions:
+> print(dim(brca_prot_meta_csv))
+[1] 105   3
+> 
+> cat("\nColumn names:\n")
+
+Column names:
+> print(colnames(brca_prot_meta_csv))
+[1] "Sample"      "Sample_Type" "Group"      
+> 
+> cat("\nFirst 10 rows:\n")
+
+First 10 rows:
+> print(head(brca_prot_meta_csv, 10))
+         Sample Sample_Type Group
+1  TCGA.A2.A0D0          NA    NA
+2  TCGA.BH.A0HK          NA    NA
+3  TCGA.C8.A12T          NA    NA
+4  TCGA.A2.A0D2          NA    NA
+5  TCGA.C8.A12U          NA    NA
+6  TCGA.AR.A1AS          NA    NA
+7  TCGA.A2.A0EV          NA    NA
+8  TCGA.AN.A0AM          NA    NA
+9  TCGA.D8.A142          NA    NA
+10 TCGA.A2.A0SW          NA    NA
+> 
+> 
+> # ============================================================
+> # 5. BRCA CLINICAL DATA\n# ============================================================
+> 
+> cat("\n============================================================\n")

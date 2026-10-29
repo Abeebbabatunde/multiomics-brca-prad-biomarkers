@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use these scripts, please cite them as below."
+type: software
+title: "Multi-omics biomarker discovery in early-stage breast and prostate cancer: analysis scripts"
+authors:
+  - family-names: "Jamiu"
+    given-names: "Abeeb Babatunde"
+year: 2026
+repository-code: "https://github.com/Abeebbabatunde/multiomics-brca-prad-biomarkers"
+license: MIT

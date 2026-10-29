@@ -1,0 +1,195 @@
+setwd("C:/Users/USER/Documents/MyThesis_MultiOmics")
+> dirs <- c("00_Scripts", "05_Scripts", "00.5_clinical_metadata_harmonization")
+> files <- list.files(dirs[dir.exists(dirs)], pattern = "\\.(R|Rmd|txt)$",
++                     recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
+> hits <- files[sapply(files, function(f) {
++   tryCatch(any(grepl("gleason", readLines(f, warn = FALSE), ignore.case = TRUE)), error = function(e) FALSE)
++ })]
+> print(hits)
+character(0)
+> for (f in hits) {
++   cat("\n####", f, "\n")
++   l <- readLines(f, warn = FALSE)
++   print(grep("gleason", l, ignore.case = TRUE, value = TRUE))
++ }
+> setwd("C:/Users/USER/Documents/MyThesis_MultiOmics")
+> suppressPackageStartupMessages({ library(data.table) })
+> fix <- function(x) gsub(".", "-", x, fixed = TRUE)
+> sink("prad_preflight.txt", split = TRUE)
+> 
+> cat("## 1. RNA meta: sample types and Gleason distribution\n")
+## 1. RNA meta: sample types and Gleason distribution
+> try({
++   rm_ <- as.data.frame(readRDS("02_ProcessedData/Prostate/prad_rna_meta.rds"))
++   cat("dim:", dim(rm_), "\ncols:", names(rm_), "\n")
++   if ("sample_type" %in% names(rm_)) print(table(rm_$sample_type, useNA = "ifany"))
++   if ("shortLetterCode" %in% names(rm_)) print(table(rm_$shortLetterCode, useNA = "ifany"))
++   gcol <- grep("gleason", names(rm_), ignore.case = TRUE, value = TRUE)
++   cat("Gleason-related columns:", gcol, "\n")
++   for (g in gcol) print(table(rm_[[g]], useNA = "ifany"))
++ })
+dim: 219 156 
+cols: barcode patient sample shortLetterCode definition sample_submitter_id intermediate_dimension tumor_descriptor sample_id pathology_report_uuid submitter_id shortest_dimension sample_type specimen_type longest_dimension days_to_collection state initial_weight tissue_type preservation_method morphology laterality treatments tissue_or_organ_of_origin age_at_diagnosis primary_diagnosis classification_of_tumor diagnosis_id site_of_resection_or_biopsy diagnosis_is_primary_disease synchronous_malignancy days_to_diagnosis prior_malignancy year_of_diagnosis secondary_gleason_grade prior_treatment method_of_diagnosis primary_gleason_grade ajcc_pathologic_t gleason_score ajcc_clinical_m ajcc_pathologic_n ajcc_clinical_t residual_disease icd_10_code ajcc_pathologic_m ajcc_staging_system_edition gleason_grade_tertiary days_to_last_follow_up follow_ups_disease_response cause_of_death race gender ethnicity vital_status age_at_index days_to_birth demographic_id age_is_obfuscated sex_at_birth country_of_residence_at_enrollment bcr_patient_barcode primary_site project_id disease_type name releasable released tumor_of_origin cause_of_death_source days_to_death paper_sample paper_patient paper_Subtype paper_Batch paper_Age paper_Race paper_PSA_preop paper_Tumor_cellularity_pathology paper_Reviewed_Gleason paper_Reviewed_Gleason_category paper_Reviewed_Gleason_sum paper_Clinical_Gleason paper_Clinical_Gleason_category paper_Clinical_Gleason_sum paper_Residual_tumor paper_Absolute_Ploidy paper_Absolute_Genome_Doublings paper_ABSOLUTE_purity paper_CLONET_purity paper_avgDNA_purity paper_ISOpure_purity paper_DeMix_purity paper_avgRNA_purity paper_SCNA_cluster paper_iCluster paper_mRNA_cluster paper_methylation_cluster paper_RPPA_cluster paper_miRNA_cluster paper_exon_imbalance_score paper_ERG_status paper_ETV1_status paper_ETV4_status paper_FLI1_status paper_SPOP_mut paper_FOXA1_mut paper_MED12_mut paper_IDH1_mut paper_KMT2A_mut paper_KMT2C_mut paper_KMT2D_mut paper_KDM6A_mut paper_SE ... <truncated>
+
+      Primary Tumor Solid Tissue Normal 
+                190                  29 
+
+ NT  TP 
+ 29 190 
+Gleason-related columns: secondary_gleason_grade primary_gleason_grade gleason_score gleason_grade_tertiary paper_Reviewed_Gleason paper_Reviewed_Gleason_category paper_Reviewed_Gleason_sum paper_Clinical_Gleason paper_Clinical_Gleason_category paper_Clinical_Gleason_sum 
+
+Pattern 3 Pattern 4 Pattern 5      <NA> 
+       70       129        13         7 
+
+Pattern 3 Pattern 4 Pattern 5      <NA> 
+      152        59         1         7 
+
+   6    7    8    9 <NA> 
+  34  148   22    8    7 
+
+Pattern 4 Pattern 5      <NA> 
+       20        11       188 
+
+ 3+3  3+4  3+5  4+3  4+4  4+5  5+4  5+5 <NA> 
+  46   48    1   20    9    6    1    0   88 
+
+ 3+3  3+4  4+3  >=8 <NA> 
+  46   48   20   17   88 
+
+   6    7    8    9 <NA> 
+  46   68   10    7   88 
+
+ 2+4  3+3  3+4  3+5  4+3  4+4  4+5  5+3  5+4  5+5 <NA> 
+   0   16   66    3   17    9    5    0    0    0  103 
+
+ 3+3  3+4  3+5  4+3  >=8 <NA> 
+  16   66    2   17   15  103 
+
+   6    7    8    9 <NA> 
+  16   83   12    5  103 
+> 
+> cat("\n## 2. Methylation matrix: columns and value range\n")
+
+## 2. Methylation matrix: columns and value range
+> try({
++   mh <- fix(names(fread("02_ProcessedData/Prostate/prad_meth_normalized.csv", nrows = 0)))
++   mh <- mh[grepl("^TCGA", mh)]
++   cat("cols:", length(mh), "\n")
++   print(table(substr(mh, 14, 15)))
++   x <- fread("02_ProcessedData/Prostate/prad_meth_normalized.csv", nrows = 2000)
++   cat("value range:", range(unlist(x[, sapply(x, is.numeric), with = FALSE]), na.rm = TRUE), "\n")
++ })
+cols: 213 
+
+ 01  11 
+191  22 
+value range: 0.006562855 0.9933279 
+> 
+> cat("\n## 3. RNA matrix: format\n")
+
+## 3. RNA matrix: format
+> try({
++   robj <- readRDS("02_ProcessedData/Prostate/prad_rna_normalized.csv") # will fail if actually csv; handled below
++ })
+Error in readRDS("02_ProcessedData/Prostate/prad_rna_normalized.csv") : 
+  unknown input format
+> try({
++   rh <- fix(names(fread("02_ProcessedData/Prostate/prad_rna_normalized.csv", nrows = 0)))
++   rh <- rh[grepl("^TCGA", rh)]
++   cat("cols:", length(rh), "\n")
++   print(table(substr(rh, 14, 15)))
++ })
+cols: 219 
+
+ 01  11 
+190  29 
+> 
+> cat("\n## 4. Protein file (check if usable at all)\n")
+
+## 4. Protein file (check if usable at all)
+> try({
++   ph <- names(fread("02_ProcessedData/Prostate/prad_protein_normalized.csv", nrows = 0))
++   cat("cols:", length(ph), "\n"); print(head(ph, 5))
++   pm <- as.data.frame(readRDS("02_ProcessedData/Prostate/prad_prot_meta.rds"))
++   cat("meta dim:", dim(pm), "\n"); print(head(pm, 3))
++ })
+cols: 37 
+[1] "V1"                                            
+[2] "individual  1, neoplasm"                       
+[3] "individual  1, normal tissue adjacent to tumor"
+[4] "individual  10, neoplasm"                      
+[5] "individual  11, neoplasm"                      
+meta dim: 110 3 
+        Sample               Group               group
+1 TCGA.2A.A8VL EarlyProstateCancer EarlyProstateCancer
+2 TCGA.2A.A8VV EarlyProstateCancer EarlyProstateCancer
+3 TCGA.2A.AAYO EarlyProstateCancer EarlyProstateCancer
+> 
+> cat("\n## 5. Result files: DMP/DEG cut-offs\n")
+
+## 5. Result files: DMP/DEG cut-offs
+> for (f in c("03_Results/Epigenomics/prad_DMPs.csv",
++             "03_Results/Transcriptomics/prad_DEGs.csv",
++             "03_Results/Proteomics/prad_DEPs.csv")) try({
++               d <- fread(f); cat("\n", f, "\n"); print(dim(d)); print(names(d))
++               num <- names(d)[sapply(d, is.numeric)]
++               print(sapply(d[, ..num], range, na.rm = TRUE))
++             })
+
+ 03_Results/Epigenomics/prad_DMPs.csv 
+[1] 63993     8
+[1] "probe_id"   "logFC"      "delta_beta" "P.Value"    "adj.P.Val"  "AveExpr"   
+[7] "t"          "B"         
+         logFC delta_beta      P.Value    adj.P.Val   AveExpr         t         B
+[1,] -5.358478 -0.5205587 1.111141e-38 4.871129e-34 -5.587094 -14.49321 -4.464043
+[2,]  5.994389  0.6267652 2.701212e-02 4.968944e-02  6.010031  16.09670 76.980566
+
+ 03_Results/Transcriptomics/prad_DEGs.csv 
+[1] 5449    6
+[1] "ensembl_gene_id" "baseMean"        "log2FoldChange"  "lfcSE"          
+[5] "pvalue"          "padj"           
+         baseMean log2FoldChange      lfcSE        pvalue          padj
+[1,] 3.320035e-01     -11.539049 0.09181302 6.800357e-114 2.645339e-109
+[2,] 3.632637e+05       6.029995 1.94404087  1.071257e-02  2.601242e-02
+
+ 03_Results/Proteomics/prad_DEPs.csv 
+[1] 5412    9
+[1] "Protein"      "GeneName"     "log2FC"       "AveExpr"      "t"           
+[6] "p_value"      "FDR"          "B"            "Significance"
+        log2FC   AveExpr         t      p_value          FDR         B
+[1,] -6.613015  4.281724 -5.730801 2.554736e-09 1.382623e-05 -5.883316
+[2,]  4.658030 25.355472  7.672569 9.998781e-01 9.998781e-01 10.361421
+> 
+> cat("\n## 6. DE design (if dds object exists)\n")
+
+## 6. DE design (if dds object exists)
+> try({
++   dds <- readRDS("02_ProcessedData/Prostate/dds_prad.rds")
++   suppressPackageStartupMessages(library(DESeq2))
++   print(design(dds)); print(dim(dds)); print(table(colData(dds)$group))
++ })
+~group
+[1] 43076   219
+
+             Normal EarlyProstateCancer 
+                 29                 190 
+> 
+> cat("\n## 7. Gleason among patients with Normal samples\n")
+
+## 7. Gleason among patients with Normal samples
+> try({
++   mf <- fread("00.5_clinical_metadata_harmonization/sample_manifest_harmonized.csv")
++   prad_ids <- mf$patient_id[mf$project == "PRAD"]
++   normal_pts <- unique(substr(mh[substr(mh,14,15)=="11"], 1, 12))
++   cat("PRAD patients with a normal methylation sample:", length(normal_pts), "\n")
++   print(table(mf$gleason_score[mf$patient_id %in% normal_pts], useNA = "ifany"))
++ })
+PRAD patients with a normal methylation sample: 22 
+
+ 7  8 
+20  2 
+> 
+> sink()
+> cat("\nDone — open prad_preflight.txt\n")
+
+Done — open prad_preflight.txt

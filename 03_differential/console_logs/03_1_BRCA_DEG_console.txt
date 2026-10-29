@@ -1,0 +1,125 @@
+if(!exists("dds_brca")){
++   dds_brca <- readRDS(
++     "02_ProcessedData/Breast/dds_brca.rds")
++ }
+> 
+> cat("Running DESeq2 for breast cancer...\n")
+Running DESeq2 for breast cancer...
+> dds_brca <- DESeq(dds_brca)
+using pre-existing size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 8566 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> 
+> res_brca      <- results(dds_brca,
++                          contrast=c("group","EarlyBreastCancer","Normal"),
++                          alpha=0.05)
+> brca_degs_all <- as.data.frame(res_brca)
+> brca_degs_all <- brca_degs_all[
++   complete.cases(brca_degs_all),]
+> 
+> brca_degs <- brca_degs_all[
++   brca_degs_all$padj < 0.05 &
++     abs(brca_degs_all$log2FoldChange) > 1,]
+> 
+> cat("✅ Breast DEGs:", nrow(brca_degs),"\n")
+✅ Breast DEGs: 12402 
+> cat("  Upregulated  :",
++     sum(brca_degs$log2FoldChange>0),"\n")
+  Upregulated  : 8558 
+> cat("  Downregulated:",
++     sum(brca_degs$log2FoldChange<0),"\n")
+  Downregulated: 3844 
+> 
+> # Volcano plot
+> v <- EnhancedVolcano(brca_degs_all,
++                      lab=rownames(brca_degs_all),
++                      x="log2FoldChange", y="padj",
++                      title="Early Breast Cancer — DEGs",
++                      pCutoff=0.05, FCcutoff=1.0)
+Warning messages:
+1: One or more p-values is 0. Converting to 10^-1 * current lowest non-zero p-value... 
+2: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.
+ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+  Please report the issue to the authors.
+This warning is displayed once per session.
+Call lifecycle::last_lifecycle_warnings() to see where this warning was generated. 
+3: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+ℹ Please use the `linewidth` argument instead.
+ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+  Please report the issue to the authors.
+This warning is displayed once per session.
+Call lifecycle::last_lifecycle_warnings() to see where this warning was generated. 
+> print(v)
+> ggsave("04_Figures/Volcano_Breast_DEGs.pdf",
++        v, width=10, height=8) if(!exists("dds_brca")){
++   dds_brca <- readRDS(
++     "02_ProcessedData/Breast/dds_brca.rds")
++ }
+> 
+> cat("Running DESeq2 for breast cancer...\n")
+Running DESeq2 for breast cancer...
+> dds_brca <- DESeq(dds_brca)
+using pre-existing size factors
+estimating dispersions
+gene-wise dispersion estimates
+mean-dispersion relationship
+final dispersion estimates
+fitting model and testing
+-- replacing outliers and refitting for 8566 genes
+-- DESeq argument 'minReplicatesForReplace' = 7 
+-- original counts are preserved in counts(dds)
+estimating dispersions
+fitting model and testing
+> 
+> res_brca      <- results(dds_brca,
++                          contrast=c("group","EarlyBreastCancer","Normal"),
++                          alpha=0.05)
+> brca_degs_all <- as.data.frame(res_brca)
+> brca_degs_all <- brca_degs_all[
++   complete.cases(brca_degs_all),]
+> 
+> brca_degs <- brca_degs_all[
++   brca_degs_all$padj < 0.05 &
++     abs(brca_degs_all$log2FoldChange) > 1,]
+> 
+> cat("✅ Breast DEGs:", nrow(brca_degs),"\n")
+✅ Breast DEGs: 12402 
+> cat("  Upregulated  :",
++     sum(brca_degs$log2FoldChange>0),"\n")
+  Upregulated  : 8558 
+> cat("  Downregulated:",
++     sum(brca_degs$log2FoldChange<0),"\n")
+  Downregulated: 3844 
+> 
+> # Volcano plot
+> v <- EnhancedVolcano(brca_degs_all,
++                      lab=rownames(brca_degs_all),
++                      x="log2FoldChange", y="padj",
++                      title="Early Breast Cancer — DEGs",
++                      pCutoff=0.05, FCcutoff=1.0)
+Warning messages:
+1: One or more p-values is 0. Converting to 10^-1 * current lowest non-zero p-value... 
+2: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.
+ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+  Please report the issue to the authors.
+This warning is displayed once per session.
+Call lifecycle::last_lifecycle_warnings() to see where this warning was generated. 
+3: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
+ℹ Please use the `linewidth` argument instead.
+ℹ The deprecated feature was likely used in the EnhancedVolcano package.
+  Please report the issue to the authors.
+This warning is displayed once per session.
+Call lifecycle::last_lifecycle_warnings() to see where this warning was generated. 
+> print(v)
+> ggsave("04_Figures/Volcano_Breast_DEGs.pdf",
++        v, width=10, height=8)

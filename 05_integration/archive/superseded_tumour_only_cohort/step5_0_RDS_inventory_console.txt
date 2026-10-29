@@ -1,0 +1,302 @@
+> # ============================================================
+> # STEP 5.0 — MULTIOMICS INTEGRATION
+> # DATA AUDIT
+> # ============================================================
+> 
+> cat("\n========== BRCA ==========\n")
+
+========== BRCA ==========
+> 
+> cat("\nBRCA files:\n")
+
+BRCA files:
+> print(list.files(
++   recursive = TRUE,
++   pattern = "\\.rds$|\\.RData$|\\.rda$",
++   full.names = TRUE
++ ))
+ [1] "./01_RawData/Breast/brca_meth.rds"                                         
+ [2] "./01_RawData/Breast/brca_meth_meta_minimal.rds"                            
+ [3] "./01_RawData/Breast/brca_prot_groups.rds"                                  
+ [4] "./01_RawData/Breast/brca_prot_meta.rds"                                    
+ [5] "./01_RawData/Breast/brca_prot_meta_full.rds"                               
+ [6] "./01_RawData/Breast/brca_rna.rds"                                          
+ [7] "./01_RawData/Breast/brca_rna_clinical_full.rds"                            
+ [8] "./01_RawData/Breast/brca_rna_meta_minimal.rds"                             
+ [9] "./01_RawData/Prostate/prad_meth.rds"                                       
+[10] "./01_RawData/Prostate/prad_meth_meta.rds"                                  
+[11] "./01_RawData/Prostate/prad_prot_groups.rds"                                
+[12] "./01_RawData/Prostate/prad_rna.rds"                                        
+[13] "./01_RawData/Prostate/prad_rna_meta.rds"                                   
+[14] "./02_ProcessedData/Breast/brca_meth_clinical_full.rds"                     
+[15] "./02_ProcessedData/Breast/brca_meth_filtered_group.rds"                    
+[16] "./02_ProcessedData/Breast/brca_meth_filtered_matrix.rds"                   
+[17] "./02_ProcessedData/Breast/brca_meth_meta_aligned.rds"                      
+[18] "./02_ProcessedData/Breast/brca_meth_top50000.rds"                          
+[19] "./02_ProcessedData/Breast/brca_prot_meta.rds"                              
+[20] "./02_ProcessedData/Breast/brca_rna_meta.rds"                               
+[21] "./02_ProcessedData/Breast/brca_vst.rds"                                    
+[22] "./02_ProcessedData/Breast/dds_brca.rds"                                    
+[23] "./02_ProcessedData/Prostate/dds_prad.rds"                                  
+[24] "./02_ProcessedData/Prostate/prad_meth_meta.rds"                            
+[25] "./02_ProcessedData/Prostate/prad_prot_meta.rds"                            
+[26] "./02_ProcessedData/Prostate/prad_rna_meta.rds"                             
+[27] "./03_Results/Epigenomics/prad_DMPs_corrected_results.rds"                  
+[28] "./03_Results/Epigenomics/prad_methylRRA_KEGG.rds"                          
+[29] "./03_Results/Proteomics/BRCA_proteomics_GO_BP_ORA_corrected.rds"           
+[30] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA.rds"                      
+[31] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA_corrected.rds"            
+[32] "./03_Results/Proteomics/prad_DEPs_all.rds"                                 
+[33] "./03_Results/Proteomics/prad_protein_metadata.rds"                         
+[34] "./03_Results/Proteomics/prad_protein_normalized.rds"                       
+[35] "./03_Results/Proteomics/PRAD_proteomics_background_Entrez.rds"             
+[36] "./03_Results/Proteomics/PRAD_proteomics_clean_mapped.rds"                  
+[37] "./03_Results/Proteomics/PRAD_proteomics_FDR_sig_Entrez.rds"                
+[38] "./03_Results/Proteomics/PRAD_proteomics_GO_BP_ORA_nominal.rds"             
+[39] "./03_Results/Proteomics/PRAD_proteomics_KEGG_ORA_nominal.rds"              
+[40] "./03_Results/Proteomics/PRAD_proteomics_nominal_sig_Entrez.rds"            
+[41] "./03_Results/Transcriptomics/BRCA_transcriptomics_GO_BP_GSEA.rds"          
+[42] "./03_Results/Transcriptomics/BRCA_transcriptomics_KEGG_GSEA.rds"           
+[43] "./03_Results/Transcriptomics/PRAD_transcriptomics_GO_BP_GSEA.rds"          
+[44] "./03_Results/Transcriptomics/PRAD_transcriptomics_KEGG_GSEA.rds"           
+[45] "./04_Figures/PCA_Breast_RNA.rds"                                           
+[46] "./df.rds"                                                                  
+[47] "./results.rds"                                                             
+[48] "./results/step2_2_methylation_diff/breast_methylation_diffmeth_results.rds"
+[49] "./results/step2_2_methylation_diff/checkpoint_partial_results.rds"         
+> 
+> cat("\n========== PRAD ==========\n")
+
+========== PRAD ==========
+> 
+> # Same complete file inventory
+> print(list.files(
++   recursive = TRUE,
++   pattern = "\\.rds$|\\.RData$|\\.rda$",
++   full.names = TRUE
++ ))
+ [1] "./01_RawData/Breast/brca_meth.rds"                                         
+ [2] "./01_RawData/Breast/brca_meth_meta_minimal.rds"                            
+ [3] "./01_RawData/Breast/brca_prot_groups.rds"                                  
+ [4] "./01_RawData/Breast/brca_prot_meta.rds"                                    
+ [5] "./01_RawData/Breast/brca_prot_meta_full.rds"                               
+ [6] "./01_RawData/Breast/brca_rna.rds"                                          
+ [7] "./01_RawData/Breast/brca_rna_clinical_full.rds"                            
+ [8] "./01_RawData/Breast/brca_rna_meta_minimal.rds"                             
+ [9] "./01_RawData/Prostate/prad_meth.rds"                                       
+[10] "./01_RawData/Prostate/prad_meth_meta.rds"                                  
+[11] "./01_RawData/Prostate/prad_prot_groups.rds"                                
+[12] "./01_RawData/Prostate/prad_rna.rds"                                        
+[13] "./01_RawData/Prostate/prad_rna_meta.rds"                                   
+[14] "./02_ProcessedData/Breast/brca_meth_clinical_full.rds"                     
+[15] "./02_ProcessedData/Breast/brca_meth_filtered_group.rds"                    
+[16] "./02_ProcessedData/Breast/brca_meth_filtered_matrix.rds"                   
+[17] "./02_ProcessedData/Breast/brca_meth_meta_aligned.rds"                      
+[18] "./02_ProcessedData/Breast/brca_meth_top50000.rds"                          
+[19] "./02_ProcessedData/Breast/brca_prot_meta.rds"                              
+[20] "./02_ProcessedData/Breast/brca_rna_meta.rds"                               
+[21] "./02_ProcessedData/Breast/brca_vst.rds"                                    
+[22] "./02_ProcessedData/Breast/dds_brca.rds"                                    
+[23] "./02_ProcessedData/Prostate/dds_prad.rds"                                  
+[24] "./02_ProcessedData/Prostate/prad_meth_meta.rds"                            
+[25] "./02_ProcessedData/Prostate/prad_prot_meta.rds"                            
+[26] "./02_ProcessedData/Prostate/prad_rna_meta.rds"                             
+[27] "./03_Results/Epigenomics/prad_DMPs_corrected_results.rds"                  
+[28] "./03_Results/Epigenomics/prad_methylRRA_KEGG.rds"                          
+[29] "./03_Results/Proteomics/BRCA_proteomics_GO_BP_ORA_corrected.rds"           
+[30] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA.rds"                      
+[31] "./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA_corrected.rds"            
+[32] "./03_Results/Proteomics/prad_DEPs_all.rds"                                 
+[33] "./03_Results/Proteomics/prad_protein_metadata.rds"                         
+[34] "./03_Results/Proteomics/prad_protein_normalized.rds"                       
+[35] "./03_Results/Proteomics/PRAD_proteomics_background_Entrez.rds"             
+[36] "./03_Results/Proteomics/PRAD_proteomics_clean_mapped.rds"                  
+[37] "./03_Results/Proteomics/PRAD_proteomics_FDR_sig_Entrez.rds"                
+[38] "./03_Results/Proteomics/PRAD_proteomics_GO_BP_ORA_nominal.rds"             
+[39] "./03_Results/Proteomics/PRAD_proteomics_KEGG_ORA_nominal.rds"              
+[40] "./03_Results/Proteomics/PRAD_proteomics_nominal_sig_Entrez.rds"            
+[41] "./03_Results/Transcriptomics/BRCA_transcriptomics_GO_BP_GSEA.rds"          
+[42] "./03_Results/Transcriptomics/BRCA_transcriptomics_KEGG_GSEA.rds"           
+[43] "./03_Results/Transcriptomics/PRAD_transcriptomics_GO_BP_GSEA.rds"          
+[44] "./03_Results/Transcriptomics/PRAD_transcriptomics_KEGG_GSEA.rds"           
+[45] "./04_Figures/PCA_Breast_RNA.rds"                                           
+[46] "./df.rds"                                                                  
+[47] "./results.rds"                                                             
+[48] "./results/step2_2_methylation_diff/breast_methylation_diffmeth_results.rds"
+[49] "./results/step2_2_methylation_diff/checkpoint_partial_results.rds"         
+> # ============================================================
+> # STEP 5.0 — COMPLETE MULTIOMICS DATA INVENTORY
+> # ============================================================
+> 
+> rds_files <- list.files(
++   recursive = TRUE,
++   pattern = "\\.rds$",
++   full.names = TRUE
++ )
+> 
+> cat("\nTotal RDS files found:", length(rds_files), "\n\n")
+
+Total RDS files found: 49 
+
+> 
+> inventory <- lapply(rds_files, function(f) {
++   
++   obj <- tryCatch(
++     readRDS(f),
++     error = function(e) NULL
++   )
++   
++   if (is.null(obj)) {
++     return(data.frame(
++       file = f,
++       class = "READ_ERROR",
++       dimensions = NA,
++       stringsAsFactors = FALSE
++     ))
++   }
++   
++   dims <- tryCatch(
++     paste(dim(obj), collapse = " x "),
++     error = function(e) NA
++   )
++   
++   data.frame(
++     file = f,
++     class = paste(class(obj), collapse = ", "),
++     dimensions = dims,
++     stringsAsFactors = FALSE
++   )
++ })
+Loading required namespace: SummarizedExperiment
+Loading required namespace: DESeq2
+Loading required namespace: enrichit
+> 
+> inventory <- do.call(rbind, inventory)
+> 
+> print(inventory, row.names = FALSE)
+                                                                       file
+                                          ./01_RawData/Breast/brca_meth.rds
+                             ./01_RawData/Breast/brca_meth_meta_minimal.rds
+                                   ./01_RawData/Breast/brca_prot_groups.rds
+                                     ./01_RawData/Breast/brca_prot_meta.rds
+                                ./01_RawData/Breast/brca_prot_meta_full.rds
+                                           ./01_RawData/Breast/brca_rna.rds
+                             ./01_RawData/Breast/brca_rna_clinical_full.rds
+                              ./01_RawData/Breast/brca_rna_meta_minimal.rds
+                                        ./01_RawData/Prostate/prad_meth.rds
+                                   ./01_RawData/Prostate/prad_meth_meta.rds
+                                 ./01_RawData/Prostate/prad_prot_groups.rds
+                                         ./01_RawData/Prostate/prad_rna.rds
+                                    ./01_RawData/Prostate/prad_rna_meta.rds
+                      ./02_ProcessedData/Breast/brca_meth_clinical_full.rds
+                     ./02_ProcessedData/Breast/brca_meth_filtered_group.rds
+                    ./02_ProcessedData/Breast/brca_meth_filtered_matrix.rds
+                       ./02_ProcessedData/Breast/brca_meth_meta_aligned.rds
+                           ./02_ProcessedData/Breast/brca_meth_top50000.rds
+                               ./02_ProcessedData/Breast/brca_prot_meta.rds
+                                ./02_ProcessedData/Breast/brca_rna_meta.rds
+                                     ./02_ProcessedData/Breast/brca_vst.rds
+                                     ./02_ProcessedData/Breast/dds_brca.rds
+                                   ./02_ProcessedData/Prostate/dds_prad.rds
+                             ./02_ProcessedData/Prostate/prad_meth_meta.rds
+                             ./02_ProcessedData/Prostate/prad_prot_meta.rds
+                              ./02_ProcessedData/Prostate/prad_rna_meta.rds
+                   ./03_Results/Epigenomics/prad_DMPs_corrected_results.rds
+                           ./03_Results/Epigenomics/prad_methylRRA_KEGG.rds
+            ./03_Results/Proteomics/BRCA_proteomics_GO_BP_ORA_corrected.rds
+                       ./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA.rds
+             ./03_Results/Proteomics/BRCA_proteomics_KEGG_ORA_corrected.rds
+                                  ./03_Results/Proteomics/prad_DEPs_all.rds
+                          ./03_Results/Proteomics/prad_protein_metadata.rds
+                        ./03_Results/Proteomics/prad_protein_normalized.rds
+              ./03_Results/Proteomics/PRAD_proteomics_background_Entrez.rds
+                   ./03_Results/Proteomics/PRAD_proteomics_clean_mapped.rds
+                 ./03_Results/Proteomics/PRAD_proteomics_FDR_sig_Entrez.rds
+              ./03_Results/Proteomics/PRAD_proteomics_GO_BP_ORA_nominal.rds
+               ./03_Results/Proteomics/PRAD_proteomics_KEGG_ORA_nominal.rds
+             ./03_Results/Proteomics/PRAD_proteomics_nominal_sig_Entrez.rds
+           ./03_Results/Transcriptomics/BRCA_transcriptomics_GO_BP_GSEA.rds
+            ./03_Results/Transcriptomics/BRCA_transcriptomics_KEGG_GSEA.rds
+           ./03_Results/Transcriptomics/PRAD_transcriptomics_GO_BP_GSEA.rds
+            ./03_Results/Transcriptomics/PRAD_transcriptomics_KEGG_GSEA.rds
+                                            ./04_Figures/PCA_Breast_RNA.rds
+                                                                   ./df.rds
+                                                              ./results.rds
+ ./results/step2_2_methylation_diff/breast_methylation_diffmeth_results.rds
+          ./results/step2_2_methylation_diff/checkpoint_partial_results.rds
+                                               class   dimensions
+                          RangedSummarizedExperiment             
+                                          data.frame      649 x 3
+                                           character             
+                                          data.frame       76 x 3
+                                          data.frame      105 x 3
+                          RangedSummarizedExperiment  60660 x 905
+                                              DFrame     905 x 95
+                                          data.frame      905 x 3
+                          RangedSummarizedExperiment 485577 x 213
+                                              DFrame    213 x 155
+                                           character             
+                          RangedSummarizedExperiment  60660 x 219
+                                          data.frame      219 x 3
+                                          data.frame     649 x 96
+                                              factor             
+                                       matrix, array 305553 x 645
+                                          data.frame       0 x 96
+                                       matrix, array    50000 x 0
+                                          data.frame       76 x 2
+                                          data.frame     905 x 96
+                                      DESeqTransform  44607 x 905
+                                        DESeqDataSet  44607 x 905
+                                        DESeqDataSet  43076 x 219
+                                          data.frame    213 x 156
+                                          data.frame      110 x 3
+                                          data.frame    219 x 156
+                                          data.frame  485577 x 10
+                                          data.frame      213 x 7
+                                        enrichResult       0 x 12
+                                        enrichResult       0 x 14
+                                        enrichResult       0 x 14
+                                          data.frame     5412 x 9
+                                          data.frame       36 x 2
+                                       matrix, array    5412 x 36
+                                           character             
+                             tbl_df, tbl, data.frame    5336 x 10
+                                           character             
+                                        enrichResult       1 x 12
+                                        enrichResult       1 x 14
+                                           character             
+                                          gseaResult    2082 x 12
+                                          gseaResult     167 x 12
+                                          gseaResult    1405 x 12
+                                          gseaResult     142 x 12
+ ggplot2::ggplot, ggplot, ggplot2::gg, S7_object, gg             
+                              data.table, data.frame       3 x 66
+                                          data.frame       3 x 28
+                                          data.frame   305553 x 4
+                                                list             
+> 
+> # Save the inventory
+> dir.create(
++   "05_FinalResults",
++   showWarnings = FALSE,
++   recursive = TRUE
++ )
+> 
+> saveRDS(
++   inventory,
++   "05_FinalResults/Step5_RDS_inventory.rds"
++ )
+> 
+> write.csv(
++   inventory,
++   "05_FinalResults/Step5_RDS_inventory.csv",
++   row.names = FALSE
++ )
+> 
+> cat("\nInventory saved to:\n")
+
+Inventory saved to:
+> cat("05_FinalResults/Step5_RDS_inventory.rds\n")
+05_FinalResults/Step5_RDS_inventory.rds
+> cat("05_FinalResults/Step5_RDS_inventory.csv\n")
+05_FinalResults/Step5_RDS_inventory.csv5555555555555

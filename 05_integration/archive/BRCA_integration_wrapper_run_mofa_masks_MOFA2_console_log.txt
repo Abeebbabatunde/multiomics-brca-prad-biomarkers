@@ -1,0 +1,101 @@
+}
+> ntop <- c(meth = 5000, rna = 5000, prot = 457)
+> 
+> ## ---- MOFA ----
+> run_mofa <- function(A, tag, nf = 6) {
++   od <- file.path(base, tag); dir.create(od, showWarnings = FALSE)
++   X  <- mapply(top_var, A$X, ntop[names(A$X)], SIMPLIFY = FALSE)
++   mo <- create_mofa(lapply(X, as.matrix))
++   dopt <- get_default_data_options(mo); dopt$scale_views <- TRUE
++   mopt <- get_default_model_options(mo); mopt$num_factors <- nf
++   topt <- get_default_training_options(mo); topt$seed <- 123; topt$convergence_mode <- "slow"
++   mo <- prepare_mofa(mo, data_options = dopt, model_options = mopt, training_options = topt)
++   mo <- run_mofa(mo, outfile = file.path(od, "MOFA_model.hdf5"), use_basilisk = TRUE)
++   samples_metadata(mo) <- data.frame(sample = A$sid, condition = A$group, patient = A$patient)
++   ggsave(file.path(od, "MOFA_variance.png"), plot_variance_explained(mo), width = 6, height = 4)
++   ggsave(file.path(od, "MOFA_factors.png"),
++          plot_factor(mo, factors = 1:3, color_by = "condition", add_violin = TRUE), width = 7, height = 5)
++   Z <- get_factors(mo)[[1]]; pts <- unique(A$patient)
++   pv <- apply(Z, 2, function(z) wilcox.test(z[paste0(pts, "_T")], z[paste0(pts, "_N")], paired = TRUE)$p.value)
++   cat("\nMOFA", tag, "- paired Wilcoxon p per factor (Early vs Normal):\n"); print(signif(pv, 3))
++   for (v in names(X)) write.csv(get_weights(mo, views = v, as.data.frame = TRUE),
++                                 file.path(od, sprintf("MOFA_weights_%s.csv", v)), row.names = FALSE)
++   invisible(mo)
++ }
+> 
+> ## ---- DIABLO (paired: within-patient adjustment) ----
+> run_diablo <- function(A, tag, folds, grid) {
++   od <- file.path(base, tag); dir.create(od, showWarnings = FALSE)
++   X <- mapply(top_var, A$X, ntop[names(A$X)], SIMPLIFY = FALSE)
++   X <- lapply(X, function(m) withinVariation(t(m), design = data.frame(sample = A$patient)))
++   Y <- A$group
++   design <- matrix(0.1, length(X), length(X), dimnames = list(names(X), names(X))); diag(design) <- 0
++   tn <- tune.block.splsda(X, Y, ncomp = 2, test.keepX = grid[names(X)], design = design,
++                           validation = "Mfold", folds = folds, nrepeat = 5, dist = "centroids.dist")
++   dia <- block.splsda(X, Y, ncomp = 2, keepX = tn$choice.keepX, design = design)
++   pf  <- perf(dia, validation = "Mfold", folds = folds, nrepeat = 10, dist = "centroids.dist")
++   cat("\nDIABLO", tag, "- weighted-vote error (optimistic, small n):\n"); print(pf$WeightedVote.error.rate)
++   png(file.path(od, "DIABLO_indiv.png"),    2000, 1600, res = 250); plotIndiv(dia, ellipse = TRUE, legend = TRUE); dev.off()
++   png(file.path(od, "DIABLO_diablo.png"),   2000, 1600, res = 250); plotDiablo(dia, ncomp = 1); dev.off()
++   try({ png(file.path(od, "DIABLO_circos.png"), 2000, 2000, res = 250); circosPlot(dia, cutoff = 0.6, line = TRUE); dev.off() })
++   try({ png(file.path(od, "DIABLO_loadings.png"), 2400, 1800, res = 250); plotLoadings(dia, comp = 1, contrib = "max", method = "median"); dev.off() })
++   sel <- do.call(rbind, lapply(names(X), function(b) do.call(rbind, lapply(1:2, function(k) {
++     sv <- selectVar(dia, block = b, comp = k)[[b]]
++     data.frame(block = b, comp = k, feature = sv$name, loading = sv$value$value.var) }))))
++   write.csv(sel, file.path(od, "DIABLO_selected_features.csv"), row.names = FALSE)
++   dmp <- fread("03_Results/Epigenomics/brca_DMPs.csv")
++   cat("Selected methylation probes that are also DMPs:",
++       round(mean(sel$feature[sel$block == "meth"] %in% dmp$Probe), 2), "\n")
++   saveRDS(list(model = dia, tune = tn, perf = pf), file.path(od, "DIABLO_objects.rds"))
++   invisible(dia)
++ }
+> 
+> ## ---- RUN ----
+> A2 <- assemble(c2, FALSE)   # meth + RNA, 51 pairs (main)
+> A3 <- assemble(c3, TRUE)    # meth + RNA + protein, 16 pairs (exploratory)
+> g2 <- list(meth = c(10, 25, 50), rna = c(10, 25, 50))
+> g3 <- list(meth = c(10, 25, 50), rna = c(10, 25, 50), prot = c(5, 10, 20))
+> 
+> run_mofa(A2, "meth_rna_51pairs",  nf = 8)
+Creating MOFA object from a list of matrices (features as rows, sample as columns)...
+
+Checking data options...
+Checking training options...
+Checking model options...
+Error in run_mofa(mo, outfile = file.path(od, "MOFA_model.hdf5"), use_basilisk = TRUE) : 
+  unused arguments (outfile = file.path(od, "MOFA_model.hdf5"), use_basilisk = TRUE)
+
+> rm(run_mofa)   # remove my masking wrapper; MOFA2's own run_mofa is visible again
+> 
+> do_mofa <- function(A, tag, nf = 6) {
++   od <- file.path(base, tag); dir.create(od, showWarnings = FALSE)
++   X  <- mapply(top_var, A$X, ntop[names(A$X)], SIMPLIFY = FALSE)
++   mo <- create_mofa(lapply(X, as.matrix))
++   dopt <- get_default_data_options(mo); dopt$scale_views <- TRUE
++   mopt <- get_default_model_options(mo); mopt$num_factors <- nf
++   topt <- get_default_training_options(mo); topt$seed <- 123; topt$convergence_mode <- "slow"
++   mo <- prepare_mofa(mo, data_options = dopt, model_options = mopt, training_options = topt)
++   mo <- MOFA2::run_mofa(mo, outfile = file.path(od, "MOFA_model.hdf5"), use_basilisk = TRUE)
++   samples_metadata(mo) <- data.frame(sample = A$sid, condition = A$group, patient = A$patient)
++   ggsave(file.path(od, "MOFA_variance.png"), plot_variance_explained(mo), width = 6, height = 4)
++   ggsave(file.path(od, "MOFA_factors.png"),
++          plot_factor(mo, factors = 1:3, color_by = "condition", add_violin = TRUE), width = 7, height = 5)
++   Z <- get_factors(mo)[[1]]; pts <- unique(A$patient)
++   pv <- apply(Z, 2, function(z) wilcox.test(z[paste0(pts, "_T")], z[paste0(pts, "_N")], paired = TRUE)$p.value)
++   cat("\nMOFA", tag, "- paired Wilcoxon p per factor (Early vs Normal):\n"); print(signif(pv, 3))
++   for (v in names(X)) write.csv(get_weights(mo, views = v, as.data.frame = TRUE),
++                                 file.path(od, sprintf("MOFA_weights_%s.csv", v)), row.names = FALSE)
++   invisible(mo)
++ }
+> 
+> mofa2 <- do_mofa(A2, "meth_rna_51pairs", nf = 8)
+Creating MOFA object from a list of matrices (features as rows, sample as columns)...
+
+Checking data options...
+Checking training options...
+Checking model options...
+Connecting to the mofapy2 package using basilisk. 
+    Set 'use_basilisk' to FALSE if you prefer to manually set the python binary using 'reticulate'.
+Error in pyenv_bootstrap_windows() : 
+  Please install git and ensure it is on your PATH
+Called from: pyenv_bootstrap_windows()

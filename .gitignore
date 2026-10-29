@@ -1,0 +1,32 @@
+# Raw and processed data (large, not part of the repository)
+GDCdata/
+01_RawData/
+02_ProcessedData/
+02_Normalized/
+00.5_clinical_metadata_harmonization/
+03_Results/
+04_Pathway_Analysis/
+05_FinalResults/
+06_FinalResults/
+07_FinalResults/
+08_FinalResults/
+09_FinalResults/
+10_FinalResults/
+
+# R session files
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+.Ruserdata
+
+# Large data objects and downloads
+*.rds
+*.RData
+*.idat
+*.gz
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,201 @@
+# ============================================================
+> # PART G — FINAL SUMMARY
+> # ============================================================
+> 
+> cat("\n")
+
+> cat("============================================================\n")
+============================================================
+> cat("STEP 5.3 DIAGNOSTIC RECONCILIATION COMPLETE\n")
+STEP 5.3 DIAGNOSTIC RECONCILIATION COMPLETE
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> cat("\n---------------- BRCA ----------------\n")
+
+---------------- BRCA ----------------
+> 
+> cat(
++   "Target patients:",
++   length(brca_ids),
++   "\n"
++ )
+Target patients: 31 
+> 
+> cat(
++   "RNA 01 patients:",
++   length(brca_rna_01_patients),
++   "\n"
++ )
+RNA 01 patients: 31 
+> 
+> cat(
++   "Methylation 01 patients:",
++   length(brca_meth_01_patients),
++   "\n"
++ )
+Methylation 01 patients: 28 
+> 
+> cat(
++   "Matched RNA + methylation 01 patients:",
++   length(brca_rna_meth_01_common),
++   "\n"
++ )
+Matched RNA + methylation 01 patients: 28 
+> 
+> cat(
++   "Missing methylation 01 patients:",
++   length(brca_missing_meth_01),
++   "\n"
++ )
+Missing methylation 01 patients: 3 
+> 
+> 
+> cat("\n---------------- PRAD ----------------\n")
+
+---------------- PRAD ----------------
+> 
+> cat(
++   "Target patients:",
++   length(prad_ids),
++   "\n"
++ )
+Target patients: 187 
+> 
+> cat(
++   "RNA 01 patients:",
++   length(prad_rna_01_patients),
++   "\n"
++ )
+RNA 01 patients: 187 
+> 
+> cat(
++   "Methylation 01 patients:",
++   length(prad_meth_01_patients),
++   "\n"
++ )
+Methylation 01 patients: 187 
+> 
+> cat(
++   "Matched RNA + methylation 01 patients:",
++   length(prad_rna_meth_01_common),
++   "\n"
++ )
+Matched RNA + methylation 01 patients: 187 
+> 
+> cat(
++   "PRAD RNA duplicate patients:",
++   length(prad_rna_duplicate_patients),
++   "\n"
++ )
+PRAD RNA duplicate patients: 3 
+> 
+> cat(
++   "PRAD methylation duplicate patients:",
++   length(prad_meth_duplicate_patients),
++   "\n"
++ )
+PRAD methylation duplicate patients: 3 
+> 
+> 
+> cat("\n------------------------------------------------------------\n")
+
+------------------------------------------------------------
+> cat("IMPORTANT: No original matrices were modified.\n")
+IMPORTANT: No original matrices were modified.
+> cat("No samples were deleted.\n")
+No samples were deleted.
+> cat("No duplicate samples were selected or discarded.\n")
+No duplicate samples were selected or discarded.
+> cat("------------------------------------------------------------\n")
+------------------------------------------------------------
+> # ============================================================
+> # STEP 5.3G — PRAD DUPLICATE SAMPLE SIDE-BY-SIDE AUDIT
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("STEP 5.3G — PRAD DUPLICATE SAMPLE SIDE-BY-SIDE AUDIT\n")
+STEP 5.3G — PRAD DUPLICATE SAMPLE SIDE-BY-SIDE AUDIT
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> prad_duplicate_patients <- sort(
++   unique(
++     c(
++       prad_rna_duplicate_patients,
++       prad_meth_duplicate_patients
++     )
++   )
++ )
+> 
+> 
+> prad_duplicate_side_by_side <- merge(
++   prad_rna_duplicate_details[
++     ,
++     c(
++       "patient_id",
++       "sample_id",
++       "vial"
++     )
++   ],
++   prad_meth_duplicate_details[
++     ,
++     c(
++       "patient_id",
++       "sample_id",
++       "vial"
++     )
++   ],
++   by = c("patient_id", "vial"),
++   suffixes = c("_RNA", "_METH"),
++   all = TRUE
++ )
+> 
+> 
+> prad_duplicate_side_by_side <- prad_duplicate_side_by_side[
++   prad_duplicate_side_by_side$patient_id %in%
++     prad_duplicate_patients,
++ ]
+> 
+> 
+> prad_duplicate_side_by_side <- prad_duplicate_side_by_side[
++   order(
++     prad_duplicate_side_by_side$patient_id,
++     prad_duplicate_side_by_side$vial
++   ),
++ ]
+> 
+> 
+> print(
++   prad_duplicate_side_by_side,
++   row.names = FALSE
++ )
+   patient_id vial                sample_id_RNA               sample_id_METH
+ TCGA-HC-7740    A TCGA-HC-7740-01A-11R-2118-07 TCGA-HC-7740-01A-11D-2116-05
+ TCGA-HC-7740    B TCGA-HC-7740-01B-04R-2302-07 TCGA-HC-7740-01B-04D-2299-05
+ TCGA-HC-8258    A TCGA-HC-8258-01A-11R-2263-07 TCGA-HC-8258-01A-11D-2261-05
+ TCGA-HC-8258    B TCGA-HC-8258-01B-05R-2302-07 TCGA-HC-8258-01B-05D-2299-05
+ TCGA-HC-8261    A TCGA-HC-8261-01A-11R-2263-07 TCGA-HC-8261-01A-11D-2261-05
+ TCGA-HC-8261    B TCGA-HC-8261-01B-05R-2302-07 TCGA-HC-8261-01B-05D-2299-05
+> 
+> 
+> write.csv(
++   prad_duplicate_side_by_side,
++   "05_FinalResults/Step5_SampleMaps/PRAD_duplicate_side_by_side.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> cat("\nSaved:\n")
+
+Saved:
+> cat(
++   "05_FinalResults/Step5_SampleMaps/",
++   "PRAD_duplicate_side_by_side.csv\n",
++   sep = ""
++ )
+05_FinalResults/Step5_SampleMaps/PRAD_duplicate_side_by_side.csv

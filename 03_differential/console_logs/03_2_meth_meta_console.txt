@@ -1,0 +1,218 @@
+# -----------------------------------------------------
+> # 1. Load metadata
+> # -----------------------------------------------------
+> 
+> meth_meta_brca <- readRDS(
++   "02_ProcessedData/Breast/brca_meth_meta.rds"
++ )
+> 
+> cat("Metadata samples:",
++     nrow(meth_meta_brca), "\n\n")
+Metadata samples: 649 
+
+> 
+> 
+> # -----------------------------------------------------
+> # 2. Efficiently read methylation CSV
+> # -----------------------------------------------------
+> 
+> cat("Reading methylation file...\n")
+Reading methylation file...
+> 
+> meth_raw <- fread(
++   "02_ProcessedData/Breast/brca_meth_normalized.csv",
++   data.table = FALSE,
++   check.names = FALSE
++ )
+|--------------------------------------------------|
+|==================================================|
+> 
+> 
+> cat("Loaded dimensions:\n")
+Loaded dimensions:
+> print(dim(meth_raw))
+[1] 393747    650
+> 
+> 
+> # -----------------------------------------------------
+> # 3. Convert first column to rownames
+> # -----------------------------------------------------
+> 
+> probe_ids <- meth_raw[,1]
+> 
+> meth_raw <- meth_raw[,-1]
+> 
+> 
+> rownames(meth_raw) <- probe_ids
+> 
+> 
+> # Convert to numeric matrix
+> meth_matrix <- as.matrix(meth_raw)
+> 
+> storage.mode(meth_matrix) <- "numeric"
+> 
+> 
+> cat("\nMatrix created:\n")
+
+Matrix created:
+> print(dim(meth_matrix))
+[1] 393747    649
+> 
+> 
+> # -----------------------------------------------------
+> # 4. Remove probes with excessive missing values
+> # -----------------------------------------------------
+> 
+> cat("\nRemoving missing probes...\n")
+
+Removing missing probes...
+> 
+> 
+> missing_rate <- rowMeans(is.na(meth_matrix))
+> 
+> 
+> keep_missing <- missing_rate < 0.20
+> 
+> 
+> meth_clean <- meth_matrix[keep_missing,]
+> 
+> 
+> cat("After missing filter:\n")
+After missing filter:
+> print(dim(meth_clean))
+[1] 393747    649
+> 
+> 
+> # -----------------------------------------------------
+> # 5. Remove low variance CpGs
+> # -----------------------------------------------------
+> 
+> cat("\nCalculating CpG variance...\n")
+
+Calculating CpG variance...
+> 
+> 
+> variance_values <- rowVars(
++   meth_clean,
++   na.rm = TRUE
++ )
+> 
+> 
+> # Remove zero variance probes
+> 
+> keep_variable <- variance_values > 0
+> 
+> 
+> meth_variable <- meth_clean[keep_variable,]
+> 
+> 
+> cat("After variance filter:\n")
+After variance filter:
+> print(dim(meth_variable))
+[1] 393747    649
+> 
+> 
+> 
+> # -----------------------------------------------------
+> # 6. Select top 50,000 variable CpGs
+> # -----------------------------------------------------
+> 
+> top_number <- min(
++   50000,
++   nrow(meth_variable)
++ )
+> 
+> 
+> top_cpgs <- order(
++   variance_values[keep_variable],
++   decreasing = TRUE
++ )[1:top_number]
+> 
+> 
+> brca_meth_reduced <- meth_variable[top_cpgs,]
+> 
+> 
+> cat("\nFinal reduced methylation matrix:\n")
+
+Final reduced methylation matrix:
+> print(dim(brca_meth_reduced))
+[1] 50000   649
+> 
+> 
+> 
+> # -----------------------------------------------------
+> # 7. Align samples with metadata
+> # -----------------------------------------------------
+> 
+> common_samples <- intersect(
++   colnames(brca_meth_reduced),
++   meth_meta_brca$Sample
++ )
+> 
+> 
+> brca_meth_reduced <- brca_meth_reduced[
++   ,
++   common_samples
++ ]
+> 
+> 
+> meth_meta_brca <- meth_meta_brca[
++   match(
++     common_samples,
++     meth_meta_brca$Sample
++   ),
++ ]
+> 
+> 
+> cat("\nFinal aligned samples:\n")
+
+Final aligned samples:
+> 
+> cat("Methylation samples:",
++     ncol(brca_meth_reduced), "\n")
+Methylation samples: 0 
+> 
+> cat("Metadata samples:",
++     nrow(meth_meta_brca), "\n")
+Metadata samples: 0 
+> 
+> 
+> 
+> # -----------------------------------------------------
+> # 8. Save optimized file
+> # -----------------------------------------------------
+> 
+> dir.create(
++   "02_ProcessedData/Breast",
++   showWarnings = FALSE,
++   recursive = TRUE
++ )
+> 
+> 
+> saveRDS(
++   brca_meth_reduced,
++   "02_ProcessedData/Breast/brca_meth_top50000.rds"
++ )
+> 
+> 
+> saveRDS(
++   meth_meta_brca,
++   "02_ProcessedData/Breast/brca_meth_meta_aligned.rds"
++ )
+> 
+> 
+> cat("\n====================================\n")
+
+====================================
+> cat("✅ METHYLATION REDUCTION COMPLETE\n")
+✅ METHYLATION REDUCTION COMPLETE
+> cat("Saved: brca_meth_top50000.rds\n")
+Saved: brca_meth_top50000.rds
+> cat("Final CpGs:",
++     nrow(brca_meth_reduced), "\n")
+Final CpGs: 50000 
+> cat("Samples:",
++     ncol(brca_meth_reduced), "\n")
+Samples: 0 
+> cat("====================================\n"
++

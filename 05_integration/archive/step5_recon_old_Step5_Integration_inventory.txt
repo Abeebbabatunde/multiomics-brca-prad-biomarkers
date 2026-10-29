@@ -1,0 +1,296 @@
+## =============================================================================
+> ## STEP 5 RECON SCRIPT
+> ## Run this FIRST. It inspects your actual Step5_Integration/ folder and
+> ## your MOFA/DIABLO objects, and prints a report answering:
+> ##   Q1: What files/columns actually exist for DIABLO, MOFA, Venn/UpSet?
+> ##   Q2: Which MOFA factor(s) correlate with Normal vs Early (per cancer type)?
+> ##   Q3: What ID type is each block using (symbol / Ensembl / UniProt / CpG)?
+> ##
+> ## Nothing here modifies your files — it only reads and prints/exports a
+> ## summary report you can paste back.
+> ## =============================================================================
+> 
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+> library(readr)
+> library(stringr)
+> library(tibble)
+> 
+> ROOT       <- "C:/Users/USER/Documents/MyThesis_MultiOmics"
+> STEP5_DIR  <- file.path(ROOT, "05_FinalResults", "Step5_Integration")
+> REPORT_OUT <- file.path(ROOT, "06_FinalResults", "Step6_Network", "Step5_recon_report.txt")
+> dir.create(dirname(REPORT_OUT), recursive = TRUE, showWarnings = FALSE)
+> 
+> report_lines <- c()
+> add <- function(...) report_lines <<- c(report_lines, sprintf(...))
+> 
+> add("===== STEP 5 RECON REPORT =====")
+> add("Scanned directory: %s", STEP5_DIR)
+> add("")
+> 
+> 
+> ## ---- 1. Inventory every file in Step5_Integration ---------------------------
+> 
+> all_files <- list.files(STEP5_DIR, recursive = TRUE, full.names = TRUE)
+> add("---- 1. FILE INVENTORY (%d files) ----", length(all_files))
+> if (length(all_files) == 0) {
++   add("!! No files found. Check ROOT/STEP5_DIR path at top of script.")
++ } else {
++   for (f in all_files) add("  %s", f)
++ }
+> add("")
+> 
+> 
+> ## ---- 2. Detect ID type in a vector of feature IDs ---------------------------
+> 
+> detect_id_type <- function(ids) {
++   ids <- na.omit(ids)
++   if (length(ids) == 0) return("EMPTY")
++   n <- length(ids)
++   n_cpg     <- sum(str_detect(ids, "^cg[0-9]+$"))
++   n_ensembl <- sum(str_detect(ids, "^ENS[GTP][0-9]+"))
++   n_uniprot <- sum(str_detect(ids, "^[A-NR-Z][0-9][A-Z0-9]{3}[0-9]$|^[OPQ][0-9][A-Z0-9]{3}[0-9]$"))
++   n_entrez  <- sum(str_detect(ids, "^[0-9]+$"))
++   n_symbol  <- sum(str_detect(ids, "^[A-Za-z][A-Za-z0-9\\-\\.]*$")) - n_entrez
++   
++   props <- c(CpG_probe = n_cpg, Ensembl = n_ensembl, UniProt = n_uniprot,
++              Entrez = n_entrez, Gene_symbol_likely = n_symbol) / n
++   best <- names(which.max(props))
++   sprintf("%s (%.0f%% match, n=%d) | example IDs: %s",
++           best, props[best] * 100, n, paste(head(ids, 3), collapse = ", "))
++ }
+> 
+> 
+> ## ---- 3. Inspect every CSV: columns + ID type per column ---------------------
+> 
+> csv_files <- all_files[str_detect(all_files, "\\.csv$")]
+> add("---- 2. CSV STRUCTURE + ID TYPE DETECTION (%d csv files) ----", length(csv_files))
+> 
+> for (f in csv_files) {
++   add("")
++   add("FILE: %s", basename(f))
++   df <- tryCatch(read_csv(f, show_col_types = FALSE, n_max = 2000),
++                  error = function(e) NULL)
++   if (is.null(df)) { add("  !! could not read as CSV"); next }
++   add("  columns: %s", paste(names(df), collapse = ", "))
++   add("  n_rows (sampled up to 2000): %d", nrow(df))
++   # Try ID detection on the first column and any column with 'id'/'gene'/'probe'/'symbol' in name
++   id_like_cols <- unique(c(names(df)[1],
++                            names(df)[str_detect(tolower(names(df)),
++                                                 "id|gene|probe|symbol|uniprot|protein")]))
++   for (col in id_like_cols) {
++     if (col %in% names(df)) {
++       add("  [%s] ID type guess -> %s", col, detect_id_type(as.character(df[[col]])))
++     }
++   }
++ }
+> add("")                                                                           
+> 
+> 
+> ## ---- 4. Inspect saved R objects (.rds / .RData / .Rds) for MOFA & DIABLO ----
+> 
+> robj_files <- all_files[str_detect(all_files, "\\.(rds|RDS|RData|Rdata)$")]
+> add("---- 3. R OBJECT FILES FOUND (%d) ----", length(robj_files))
+> for (f in robj_files) add("  %s", f)
+> add("")
+> 
+> ## 4a. MOFA object inspection ---------------------------------------------------
+> ## Looks for an object of class MOFA (MOFA2 package) and, if found, correlates
+> ## each factor's per-sample values against your Normal/Early label (you must
+> ## supply/point to the label — see 'sample_metadata' below).
+> 
+> mofa_files <- robj_files[str_detect(tolower(robj_files), "mofa")]
+> if (length(mofa_files) > 0) {
++   library(MOFA2)
++   add("---- 4. MOFA FACTOR <-> LABEL CORRELATION ----")
++   
++   ## EDIT: point this to wherever your Normal/Early sample labels live
++   ## (e.g., the Step 0.5 clinical metadata / sample crosswalk file).
++   sample_metadata_path <- file.path(ROOT, "00_Metadata", "sample_metadata.csv")
++   
++   for (mf in mofa_files) {
++     add("")
++     add("MOFA file: %s", mf)
++     obj <- tryCatch({
++       if (str_detect(mf, "\\.(RData|Rdata)$")) {
++         e <- new.env(); load(mf, envir = e)
++         mofa_candidates <- Filter(function(n) inherits(get(n, envir = e), "MOFA"), ls(e))
++         if (length(mofa_candidates) == 0) NULL else get(mofa_candidates[1], envir = e)
++       } else {
++         readRDS(mf)
++       }
++     }, error = function(e) { add("  !! failed to load: %s", conditionMessage(e)); NULL })
++     
++     if (is.null(obj) || !inherits(obj, "MOFA")) {
++       add("  (not a MOFA object, or failed to load — skipping factor correlation)")
++       next
++     }
++     
++     factors_df <- as.data.frame(get_factors(obj)[[1]])
++     factors_df <- rownames_to_column(factors_df, "sample")
++     add("  Factors found: %s", paste(names(factors_df)[-1], collapse = ", "))
++     add("  N samples in MOFA object: %d", nrow(factors_df))
++     
++     if (file.exists(sample_metadata_path)) {
++       meta <- read_csv(sample_metadata_path, show_col_types = FALSE)
++       label_col <- names(meta)[str_detect(tolower(names(meta)), "group|label|status|stage|condition")]
++       if (length(label_col) == 0) {
++         add("  !! metadata found but no obvious label column (looked for group/label/status/stage/condition)")
++       } else {
++         label_col <- label_col[1]
++         id_col <- names(meta)[1]
++         merged <- factors_df |> left_join(meta, by = c("sample" = id_col))
++         merged[[label_col]] <- as.factor(merged[[label_col]])
++         
++         add("  Factor vs '%s' association (Kruskal-Wallis p-value):", label_col)
++         for (fac in names(factors_df)[-1]) {
++           p <- tryCatch(
++             kruskal.test(merged[[fac]] ~ merged[[label_col]])$p.value,
++             error = function(e) NA
++           )
++           add("    %s : p = %s", fac, ifelse(is.na(p), "NA", signif(p, 4)))
++         }
++       }
++     } else {
++       add("  !! sample_metadata_path not found (%s) — edit this path to enable factor<->label test",
++           sample_metadata_path)
++     }
++   }
++ } else {
++   add("---- 4. No MOFA .rds/.RData object found in Step5_Integration ----")
++   add("  (If MOFA results are CSV-only, factor identity/label-correlation must")
++   add("   be re-derived from your original MOFA run script/notes.)")
++ }
+> add("")
+> 
+> ## 4b. DIABLO object inspection --------------------------------------------------
+> 
+> diablo_files <- robj_files[str_detect(tolower(robj_files), "diablo|splsda|block")]
+> add("---- 5. DIABLO OBJECT INSPECTION ----")
+> if (length(diablo_files) > 0) {
++   library(mixOmics)
++   for (df_ in diablo_files) {
++     add("")
++     add("DIABLO file: %s", df_)
++     obj <- tryCatch({
++       if (str_detect(df_, "\\.(RData|Rdata)$")) {
++         e <- new.env(); load(df_, envir = e)
++         cand <- Filter(function(n) inherits(get(n, envir = e), "sgccda"), ls(e))
++         if (length(cand) == 0) NULL else get(cand[1], envir = e)
++       } else {
++         readRDS(df_)
++       }
++     }, error = function(e) { add("  !! failed to load: %s", conditionMessage(e)); NULL })
++     
++     if (is.null(obj)) { add("  (could not identify a DIABLO/sgccda object)"); next }
++     
++     sel <- tryCatch(selectVar(obj, comp = 1), error = function(e) NULL)
++     if (!is.null(sel)) {
++       for (blk in names(sel)) {
++         if (!is.null(sel[[blk]]$name)) {
++           add("  Block '%s' — %d selected features on comp 1. Example IDs: %s",
++               blk, length(sel[[blk]]$name), paste(head(sel[[blk]]$name, 3), collapse = ", "))
++           add("    ID type -> %s", detect_id_type(sel[[blk]]$name))
++         }
++       }
++     }
++   }
++ } else {
++   add("  No DIABLO/sgccda .rds/.RData object found — if DIABLO output is CSV-only,")
++   add("  the CSV structure section above already captured its columns/ID types.")
++ }
+> 
+> 
+> ## ---- 5. Write + print report --------------------------------------------------
+> 
+> writeLines(report_lines, REPORT_OUT)
+> cat(paste(report_lines, collapse = "\n"))
+===== STEP 5 RECON REPORT =====
+Scanned directory: C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration
+
+---- 1. FILE INVENTORY (17 files) ----
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Epigenomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_FINAL_3OMICS_INTEGRATION.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_FINAL_3OMICS_PATIENT_IDS.csv
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Proteomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Transcriptomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_Epigenomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_INTEGRATION.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_PATIENT_IDS.csv
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_SAMPLE_MAP.csv
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_SAMPLE_MAP.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_methylation_final_187_sample_map.csv
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_methylation_final_187_sample_map.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_RNA_final_187_sample_map.csv
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_RNA_final_187_sample_map.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_Transcriptomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/Step5.5A_Molecular_Data_Source_Audit.txt
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/Step5_FinalResults_Inventory.csv
+
+---- 2. CSV STRUCTURE + ID TYPE DETECTION (6 csv files) ----
+
+FILE: BRCA_FINAL_3OMICS_PATIENT_IDS.csv
+  columns: Patient_ID
+  n_rows (sampled up to 2000): 31
+  [Patient_ID] ID type guess -> Gene_symbol_likely (100% match, n=31) | example IDs: TCGA-AR-A0TX, TCGA-AR-A0TV, TCGA-A2-A0YM
+
+FILE: PRAD_FINAL_2OMICS_PATIENT_IDS.csv
+  columns: Patient_ID
+  n_rows (sampled up to 2000): 187
+  [Patient_ID] ID type guess -> Gene_symbol_likely (100% match, n=187) | example IDs: TCGA-XK-AAK1, TCGA-HC-7748, TCGA-EJ-A46H
+
+FILE: PRAD_FINAL_2OMICS_SAMPLE_MAP.csv
+  columns: patient, methylation_sample, methylation_barcode, methylation_sample_type, rna_sample, rna_barcode, rna_sample_type
+  n_rows (sampled up to 2000): 187
+  [patient] ID type guess -> Gene_symbol_likely (100% match, n=187) | example IDs: TCGA-XK-AAK1, TCGA-HC-7748, TCGA-EJ-A46H
+
+FILE: PRAD_methylation_final_187_sample_map.csv
+  columns: patient, barcode, sample, sample_submitter_id, sample_type, shortLetterCode, definition
+  n_rows (sampled up to 2000): 212
+  [patient] ID type guess -> Gene_symbol_likely (100% match, n=212) | example IDs: TCGA-XK-AAK1, TCGA-HC-7748, TCGA-EJ-A46H
+  [sample_submitter_id] ID type guess -> Gene_symbol_likely (100% match, n=212) | example IDs: TCGA-XK-AAK1-01A, TCGA-HC-7748-01A, TCGA-EJ-A46H-01A
+
+FILE: PRAD_RNA_final_187_sample_map.csv
+  columns: patient, barcode, sample, sample_submitter_id, sample_type, shortLetterCode, definition
+  n_rows (sampled up to 2000): 219
+  [patient] ID type guess -> Gene_symbol_likely (100% match, n=219) | example IDs: TCGA-XK-AAK1, TCGA-HC-7748, TCGA-EJ-A46H
+  [sample_submitter_id] ID type guess -> Gene_symbol_likely (100% match, n=219) | example IDs: TCGA-XK-AAK1-01A, TCGA-HC-7748-01A, TCGA-EJ-A46H-01A
+
+FILE: Step5_FinalResults_Inventory.csv
+  columns: path, filename
+  n_rows (sampled up to 2000): 36
+  [path] ID type guess -> CpG_probe (0% match, n=36) | example IDs: 05_FinalResults/Step5_all_RDS_files.txt, 05_FinalResults/Step5_BRCA_3omics_cohort.csv, 05_FinalResults/Step5_BRCA_3omics_cohort.rds
+
+---- 3. R OBJECT FILES FOUND (10) ----
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Epigenomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_FINAL_3OMICS_INTEGRATION.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Proteomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/BRCA_Transcriptomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_Epigenomics_Final.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_INTEGRATION.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_FINAL_2OMICS_SAMPLE_MAP.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_methylation_final_187_sample_map.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_RNA_final_187_sample_map.rds
+  C:/Users/USER/Documents/MyThesis_MultiOmics/05_FinalResults/Step5_Integration/PRAD_Transcriptomics_Final.rds
+
+---- 4. No MOFA .rds/.RData object found in Step5_Integration ----
+  (If MOFA results are CSV-only, factor identity/label-correlation must
+   be re-derived from your original MOFA run script/notes.)
+
+---- 5. DIABLO OBJECT INSPECTION ----
+  No DIABLO/sgccda .rds/.RData object found — if DIABLO output is CSV-only,
+  the CSV structure section above already captured its columns/ID types.> cat("\n\nFull report also saved to:\n", REPORT_OUT, "\n")
+
+
+Full report also saved to:
+ C:/Users/USER/Documents/MyThesis_MultiOmics/06_FinalResults/Step6_Network/Step5_recon_report.txt 
+>

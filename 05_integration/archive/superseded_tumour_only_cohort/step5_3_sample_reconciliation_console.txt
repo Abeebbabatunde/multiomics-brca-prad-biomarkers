@@ -1,0 +1,772 @@
+> # ============================================================
+> # STEP 5.3 — FINAL SAMPLE RECONCILIATION
+> # ============================================================
+> #
+> # Purpose:
+> #   1. Identify BRCA patients without primary-tumor methylation
+> #   2. Identify PRAD patients with multiple primary-tumor samples
+> #   3. Inspect complete TCGA barcodes, including vial information
+> #   4. Reconcile BRCA protein identifiers
+> #   5. Create preliminary final sample manifests
+> #
+> # IMPORTANT:
+> #   NO original RNA, methylation, or protein matrix is altered.
+> #   This step only creates diagnostic tables/manifests.
+> # ============================================================
+> 
+> cat("\n")
+
+> cat("============================================================\n")
+============================================================
+> cat("STEP 5.3 — FINAL SAMPLE RECONCILIATION\n")
+STEP 5.3 — FINAL SAMPLE RECONCILIATION
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> # ============================================================
+> # 1. OUTPUT DIRECTORY
+> # ============================================================
+> 
+> dir.create(
++   "05_FinalResults/Step5_SampleMaps",
++   recursive = TRUE,
++   showWarnings = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # 2. HELPER FUNCTION — FULL TCGA SAMPLE INFORMATION
+> # ============================================================
+> 
+> tcga_sample_code <- function(x) {
++   
++   x <- as.character(x)
++   
++   out <- sub(
++     "^TCGA-[^-]+-[^-]+-([0-9]{2}).*",
++     "\\1",
++     x
++   )
++   
++   out[
++     !grepl(
++       "^TCGA-[^-]+-[^-]+-[0-9]{2}",
++       x
++     )
++   ] <- NA
++   
++   out
++ }
+> 
+> 
+> tcga_vial <- function(x) {
++   
++   x <- as.character(x)
++   
++   out <- sub(
++     "^TCGA-[^-]+-[^-]+-[0-9]{2}([A-Z]).*",
++     "\\1",
++     x
++   )
++   
++   out[
++     !grepl(
++       "^TCGA-[^-]+-[^-]+-[0-9]{2}[A-Z]",
++       x
++     )
++   ] <- NA
++   
++   out
++ }
+> 
+> 
+> # ============================================================
+> # 3. ADD FULL SAMPLE INFORMATION TO EXISTING MAPS
+> # ============================================================
+> 
+> brca_rna_map$sample_code_full <- tcga_sample_code(
++   brca_rna_map$sample_id
++ )
+> 
+> brca_rna_map$vial <- tcga_vial(
++   brca_rna_map$sample_id
++ )
+> 
+> 
+> brca_meth_map$sample_code_full <- tcga_sample_code(
++   brca_meth_map$sample_id
++ )
+> 
+> brca_meth_map$vial <- tcga_vial(
++   brca_meth_map$sample_id
++ )
+> 
+> 
+> prad_rna_map$sample_code_full <- tcga_sample_code(
++   prad_rna_map$sample_id
++ )
+> 
+> prad_rna_map$vial <- tcga_vial(
++   prad_rna_map$sample_id
++ )
+> 
+> 
+> prad_meth_map$sample_code_full <- tcga_sample_code(
++   prad_meth_map$sample_id
++ )
+> 
+> prad_meth_map$vial <- tcga_vial(
++   prad_meth_map$sample_id
++ )
+> 
+> 
+> # ============================================================
+> # PART A — BRCA PRIMARY-TUMOR METHYLATION AUDIT
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3A — BRCA PRIMARY-TUMOR METHYLATION AUDIT\n")
+5.3A — BRCA PRIMARY-TUMOR METHYLATION AUDIT
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> brca_meth_01 <- brca_meth_map[
++   brca_meth_map$target_patient &
++     brca_meth_map$sample_code_full == "01",
++ ]
+> 
+> 
+> brca_meth_01_patients <- unique(
++   brca_meth_01$patient_id
++ )
+> 
+> 
+> brca_missing_meth_01 <- setdiff(
++   brca_ids,
++   brca_meth_01_patients
++ )
+> 
+> 
+> cat(
++   "\nBRCA target patients:",
++   length(brca_ids),
++   "\n"
++ )
+
+BRCA target patients: 31 
+> 
+> cat(
++   "BRCA patients with methylation 01:",
++   length(brca_meth_01_patients),
++   "\n"
++ )
+BRCA patients with methylation 01: 28 
+> 
+> cat(
++   "BRCA patients without methylation 01:",
++   length(brca_missing_meth_01),
++   "\n"
++ )
+BRCA patients without methylation 01: 3 
+> 
+> 
+> cat("\nPatients without methylation 01:\n")
+
+Patients without methylation 01:
+> 
+> if (length(brca_missing_meth_01) > 0) {
++   
++   print(brca_missing_meth_01)
++   
++ } else {
++   
++   cat("NONE\n")
++   
++ }
+[1] "TCGA-A7-A0CE" "TCGA-BH-A0BV" "TCGA-BH-A18V"
+> 
+> 
+> # Save missing-primary-tumor table
+> 
+> brca_missing_meth_table <- data.frame(
++   patient_id = brca_missing_meth_01,
++   stringsAsFactors = FALSE
++ )
+> 
+> 
+> write.csv(
++   brca_missing_meth_table,
++   "05_FinalResults/Step5_SampleMaps/BRCA_missing_primary_methylation.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # 4. SHOW OTHER BRCA METHYLATION SAMPLES FOR MISSING PATIENTS
+> # ============================================================
+> 
+> cat("\nBRCA methylation samples for patients lacking 01:\n")
+
+BRCA methylation samples for patients lacking 01:
+> 
+> 
+> brca_missing_meth_details <- brca_meth_map[
++   brca_meth_map$patient_id %in% brca_missing_meth_01,
++ ]
+> 
+> 
+> if (nrow(brca_missing_meth_details) > 0) {
++   
++   print(
++     brca_missing_meth_details[
++       ,
++       c(
++         "patient_id",
++         "sample_id",
++         "sample_code_full",
++         "vial"
++       )
++     ]
++   )
++   
++ } else {
++   
++   cat("No methylation samples found for these patients.\n")
++   
++ }
+      patient_id                    sample_id sample_code_full vial
+197 TCGA-A7-A0CE TCGA-A7-A0CE-11A-21D-A10Q-05               11    A
+440 TCGA-BH-A0BV TCGA-BH-A0BV-11A-31D-A10Q-05               11    A
+595 TCGA-BH-A18V TCGA-BH-A18V-06A-11D-A212-05               06    A
+> 
+> 
+> write.csv(
++   brca_missing_meth_details,
++   "05_FinalResults/Step5_SampleMaps/BRCA_missing_primary_methylation_details.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # PART B — PRAD DUPLICATE PRIMARY-TUMOR AUDIT
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3B — PRAD DUPLICATE PRIMARY-TUMOR AUDIT\n")
+5.3B — PRAD DUPLICATE PRIMARY-TUMOR AUDIT
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> # ------------------------------------------------------------
+> # PRAD RNA
+> # ------------------------------------------------------------
+> 
+> prad_rna_01 <- prad_rna_map[
++   prad_rna_map$target_patient &
++     prad_rna_map$sample_code_full == "01",
++ ]
+> 
+> 
+> prad_rna_01_counts <- table(
++   prad_rna_01$patient_id
++ )
+> 
+> 
+> prad_rna_duplicate_patients <- names(
++   prad_rna_01_counts[
++     prad_rna_01_counts > 1
++   ]
++ )
+> 
+> 
+> cat(
++   "\nPRAD RNA patients with >1 primary tumor sample:",
++   length(prad_rna_duplicate_patients),
++   "\n"
++ )
+
+PRAD RNA patients with >1 primary tumor sample: 3 
+> 
+> 
+> if (length(prad_rna_duplicate_patients) > 0) {
++   
++   print(prad_rna_duplicate_patients)
++   
++ }
+[1] "TCGA-HC-7740" "TCGA-HC-8258" "TCGA-HC-8261"
+> 
+> 
+> prad_rna_duplicate_details <- prad_rna_01[
++   prad_rna_01$patient_id %in%
++     prad_rna_duplicate_patients,
++ ]
+> 
+> 
+> cat("\nPRAD RNA duplicate primary samples:\n")
+
+PRAD RNA duplicate primary samples:
+> 
+> if (nrow(prad_rna_duplicate_details) > 0) {
++   
++   print(
++     prad_rna_duplicate_details[
++       ,
++       c(
++         "patient_id",
++         "sample_id",
++         "sample_code_full",
++         "vial"
++       )
++     ]
++   )
++   
++ } else {
++   
++   cat("NONE\n")
++   
++ }
+      patient_id                    sample_id sample_code_full vial
+46  TCGA-HC-8258 TCGA-HC-8258-01B-05R-2302-07               01    B
+47  TCGA-HC-8258 TCGA-HC-8258-01A-11R-2263-07               01    A
+144 TCGA-HC-8261 TCGA-HC-8261-01A-11R-2263-07               01    A
+145 TCGA-HC-8261 TCGA-HC-8261-01B-05R-2302-07               01    B
+191 TCGA-HC-7740 TCGA-HC-7740-01B-04R-2302-07               01    B
+192 TCGA-HC-7740 TCGA-HC-7740-01A-11R-2118-07               01    A
+> 
+> 
+> # ------------------------------------------------------------
+> # PRAD METHYLATION
+> # ------------------------------------------------------------
+> 
+> prad_meth_01 <- prad_meth_map[
++   prad_meth_map$target_patient &
++     prad_meth_map$sample_code_full == "01",
++ ]
+> 
+> 
+> prad_meth_01_counts <- table(
++   prad_meth_01$patient_id
++ )
+> 
+> 
+> prad_meth_duplicate_patients <- names(
++   prad_meth_01_counts[
++     prad_meth_01_counts > 1
++   ]
++ )
+> 
+> 
+> cat(
++   "\nPRAD methylation patients with >1 primary tumor sample:",
++   length(prad_meth_duplicate_patients),
++   "\n"
++ )
+
+PRAD methylation patients with >1 primary tumor sample: 3 
+> 
+> 
+> if (length(prad_meth_duplicate_patients) > 0) {
++   
++   print(prad_meth_duplicate_patients)
++   
++ }
+[1] "TCGA-HC-7740" "TCGA-HC-8258" "TCGA-HC-8261"
+> 
+> 
+> prad_meth_duplicate_details <- prad_meth_01[
++   prad_meth_01$patient_id %in%
++     prad_meth_duplicate_patients,
++ ]
+> 
+> 
+> cat("\nPRAD methylation duplicate primary samples:\n")
+
+PRAD methylation duplicate primary samples:
+> 
+> if (nrow(prad_meth_duplicate_details) > 0) {
++   
++   print(
++     prad_meth_duplicate_details[
++       ,
++       c(
++         "patient_id",
++         "sample_id",
++         "sample_code_full",
++         "vial"
++       )
++     ]
++   )
++   
++ } else {
++   
++   cat("NONE\n")
++   
++ }
+      patient_id                    sample_id sample_code_full vial
+44  TCGA-HC-8258 TCGA-HC-8258-01A-11D-2261-05               01    A
+45  TCGA-HC-8258 TCGA-HC-8258-01B-05D-2299-05               01    B
+139 TCGA-HC-8261 TCGA-HC-8261-01B-05D-2299-05               01    B
+140 TCGA-HC-8261 TCGA-HC-8261-01A-11D-2261-05               01    A
+185 TCGA-HC-7740 TCGA-HC-7740-01A-11D-2116-05               01    A
+186 TCGA-HC-7740 TCGA-HC-7740-01B-04D-2299-05               01    B
+> 
+> 
+> # ============================================================
+> # 5. COMBINE PRAD DUPLICATE INFORMATION
+> # ============================================================
+> 
+> prad_duplicate_details <- rbind(
++   
++   data.frame(
++     omics = "RNA",
++     prad_rna_duplicate_details,
++     stringsAsFactors = FALSE
++   ),
++   
++   data.frame(
++     omics = "Methylation",
++     prad_meth_duplicate_details,
++     stringsAsFactors = FALSE
++   )
++   
++ )
+> 
+> 
+> write.csv(
++   prad_duplicate_details,
++   "05_FinalResults/Step5_SampleMaps/PRAD_duplicate_primary_samples.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # PART C — BRCA RNA/METHYLATION PRIMARY-TUMOR MATCHING
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3C — BRCA PRIMARY-TUMOR RNA/METHYLATION MATCHING\n")
+5.3C — BRCA PRIMARY-TUMOR RNA/METHYLATION MATCHING
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> brca_rna_01_patients <- unique(
++   brca_rna_map$patient_id[
++     brca_rna_map$target_patient &
++       brca_rna_map$sample_code_full == "01"
++   ]
++ )
+> 
+> 
+> brca_meth_01_patients <- unique(
++   brca_meth_map$patient_id[
++     brca_meth_map$target_patient &
++       brca_meth_map$sample_code_full == "01"
++   ]
++ )
+> 
+> 
+> brca_rna_meth_01_common <- intersect(
++   brca_rna_01_patients,
++   brca_meth_01_patients
++ )
+> 
+> 
+> brca_rna_only_01 <- setdiff(
++   brca_rna_01_patients,
++   brca_meth_01_patients
++ )
+> 
+> 
+> brca_meth_only_01 <- setdiff(
++   brca_meth_01_patients,
++   brca_rna_01_patients
++ )
+> 
+> 
+> cat(
++   "\nBRCA RNA primary-tumor patients:",
++   length(brca_rna_01_patients),
++   "\n"
++ )
+
+BRCA RNA primary-tumor patients: 31 
+> 
+> cat(
++   "BRCA methylation primary-tumor patients:",
++   length(brca_meth_01_patients),
++   "\n"
++ )
+BRCA methylation primary-tumor patients: 28 
+> 
+> cat(
++   "BRCA matched primary-tumor patients:",
++   length(brca_rna_meth_01_common),
++   "\n"
++ )
+BRCA matched primary-tumor patients: 28 
+> 
+> cat(
++   "BRCA RNA-only primary-tumor patients:",
++   length(brca_rna_only_01),
++   "\n"
++ )
+BRCA RNA-only primary-tumor patients: 3 
+> 
+> cat(
++   "BRCA methylation-only primary-tumor patients:",
++   length(brca_meth_only_01),
++   "\n"
++ )
+BRCA methylation-only primary-tumor patients: 0 
+> 
+> 
+> # ============================================================
+> # PART D — PRAD RNA/METHYLATION PRIMARY-TUMOR MATCHING
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3D — PRAD PRIMARY-TUMOR RNA/METHYLATION MATCHING\n")
+5.3D — PRAD PRIMARY-TUMOR RNA/METHYLATION MATCHING
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> prad_rna_01_patients <- unique(
++   prad_rna_map$patient_id[
++     prad_rna_map$target_patient &
++       prad_rna_map$sample_code_full == "01"
++   ]
++ )
+> 
+> 
+> prad_meth_01_patients <- unique(
++   prad_meth_map$patient_id[
++     prad_meth_map$target_patient &
++       prad_meth_map$sample_code_full == "01"
++   ]
++ )
+> 
+> 
+> prad_rna_meth_01_common <- intersect(
++   prad_rna_01_patients,
++   prad_meth_01_patients
++ )
+> 
+> 
+> cat(
++   "\nPRAD RNA primary-tumor patients:",
++   length(prad_rna_01_patients),
++   "\n"
++ )
+
+PRAD RNA primary-tumor patients: 187 
+> 
+> cat(
++   "PRAD methylation primary-tumor patients:",
++   length(prad_meth_01_patients),
++   "\n"
++ )
+PRAD methylation primary-tumor patients: 187 
+> 
+> cat(
++   "PRAD matched primary-tumor patients:",
++   length(prad_rna_meth_01_common),
++   "\n"
++ )
+PRAD matched primary-tumor patients: 187 
+> 
+> 
+> # ============================================================
+> # PART E — PRELIMINARY BRCA FINAL SAMPLE MANIFEST
+> # ============================================================
+> #
+> # IMPORTANT:
+> #   We do NOT yet select between duplicate samples.
+> #   This manifest records all available target samples.
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3E — BRCA PRELIMINARY SAMPLE MANIFEST\n")
+5.3E — BRCA PRELIMINARY SAMPLE MANIFEST
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> brca_manifest <- data.frame(
++   patient_id = brca_ids,
++   stringsAsFactors = FALSE
++ )
+> 
+> 
+> # ------------------------------------------------------------
+> # RNA primary tumor
+> # ------------------------------------------------------------
+> 
+> brca_rna_01_lookup <- brca_rna_map[
++   brca_rna_map$target_patient &
++     brca_rna_map$sample_code_full == "01",
++   c(
++     "patient_id",
++     "sample_id",
++     "vial"
++   )
++ ]
+> 
+> 
+> colnames(brca_rna_01_lookup) <- c(
++   "patient_id",
++   "RNA_01_sample",
++   "RNA_01_vial"
++ )
+> 
+> 
+> brca_manifest <- merge(
++   brca_manifest,
++   brca_rna_01_lookup,
++   by = "patient_id",
++   all.x = TRUE,
++   sort = FALSE
++ )
+> 
+> 
+> # ------------------------------------------------------------
+> # Methylation primary tumor
+> # ------------------------------------------------------------
+> 
+> brca_meth_01_lookup <- brca_meth_map[
++   brca_meth_map$target_patient &
++     brca_meth_map$sample_code_full == "01",
++   c(
++     "patient_id",
++     "sample_id",
++     "vial"
++   )
++ ]
+> 
+> 
+> colnames(brca_meth_01_lookup) <- c(
++   "patient_id",
++   "METH_01_sample",
++   "METH_01_vial"
++ )
+> 
+> 
+> brca_manifest <- merge(
++   brca_manifest,
++   brca_meth_01_lookup,
++   by = "patient_id",
++   all.x = TRUE,
++   sort = FALSE
++ )
+> 
+> 
+> # Restore target patient order
+> 
+> brca_manifest <- brca_manifest[
++   match(
++     brca_ids,
++     brca_manifest$patient_id
++   ),
++ ]
+> 
+> 
+> # ------------------------------------------------------------
+> # Match status
+> # ------------------------------------------------------------
+> 
+> brca_manifest$RNA_METH_01_matched <-
++   
++   !is.na(brca_manifest$RNA_01_sample) &
++   !is.na(brca_manifest$METH_01_sample)
+> 
+> 
+> print(head(brca_manifest, 20))
+     patient_id                RNA_01_sample RNA_01_vial
+1  TCGA-AR-A0TX TCGA-AR-A0TX-01A-11R-A084-07           A
+2  TCGA-AR-A0TV TCGA-AR-A0TV-01A-21R-A084-07           A
+3  TCGA-A2-A0YM TCGA-A2-A0YM-01A-11R-A109-07           A
+4  TCGA-AR-A1AS TCGA-AR-A1AS-01A-11R-A12P-07           A
+5  TCGA-AR-A1AW TCGA-AR-A1AW-01A-21R-A12P-07           A
+6  TCGA-AO-A126 TCGA-AO-A126-01A-11R-A10J-07           A
+7  TCGA-BH-A0DD TCGA-BH-A0DD-01A-31R-A12P-07           A
+8  TCGA-BH-A0DG TCGA-BH-A0DG-01A-21R-A12P-07           A
+9  TCGA-A2-A0YI TCGA-A2-A0YI-01A-31R-A10J-07           A
+29 TCGA-A7-A0CE TCGA-A7-A0CE-01A-11R-A00Z-07           A
+10 TCGA-AO-A12B TCGA-AO-A12B-01A-11R-A10J-07           A
+11 TCGA-AO-A0JC TCGA-AO-A0JC-01A-11R-A056-07           A
+12 TCGA-A2-A0YD TCGA-A2-A0YD-01A-11R-A109-07           A
+13 TCGA-AO-A12E TCGA-AO-A12E-01A-11R-A10J-07           A
+14 TCGA-AR-A1AP TCGA-AR-A1AP-01A-11R-A12P-07           A
+15 TCGA-BH-A0E1 TCGA-BH-A0E1-01A-11R-A056-07           A
+16 TCGA-AR-A1AQ TCGA-AR-A1AQ-01A-11R-A12P-07           A
+17 TCGA-AO-A0JJ TCGA-AO-A0JJ-01A-11R-A056-07           A
+18 TCGA-AO-A0JM TCGA-AO-A0JM-01A-21R-A056-07           A
+19 TCGA-BH-A0C0 TCGA-BH-A0C0-01A-21R-A056-07           A
+                 METH_01_sample METH_01_vial RNA_METH_01_matched
+1  TCGA-AR-A0TX-01A-11D-A10P-05            A                TRUE
+2  TCGA-AR-A0TV-01A-21D-A10P-05            A                TRUE
+3  TCGA-A2-A0YM-01A-11D-A10A-05            A                TRUE
+4  TCGA-AR-A1AS-01A-11D-A12R-05            A                TRUE
+5  TCGA-AR-A1AW-01A-21D-A12R-05            A                TRUE
+6  TCGA-AO-A126-01A-11D-A10N-05            A                TRUE
+7  TCGA-BH-A0DD-01A-31D-A12R-05            A                TRUE
+8  TCGA-BH-A0DG-01A-21D-A12R-05            A                TRUE
+9  TCGA-A2-A0YI-01A-31D-A10N-05            A                TRUE
+29                         <NA>         <NA>               FALSE
+10 TCGA-AO-A12B-01A-11D-A10N-05            A                TRUE
+11 TCGA-AO-A0JC-01A-11D-A10P-05            A                TRUE
+12 TCGA-A2-A0YD-01A-11D-A10A-05            A                TRUE
+13 TCGA-AO-A12E-01A-11D-A10N-05            A                TRUE
+14 TCGA-AR-A1AP-01A-11D-A12R-05            A                TRUE
+15 TCGA-BH-A0E1-01A-11D-A10P-05            A                TRUE
+16 TCGA-AR-A1AQ-01A-11D-A12R-05            A                TRUE
+17 TCGA-AO-A0JJ-01A-11D-A10P-05            A                TRUE
+18 TCGA-AO-A0JM-01A-21D-A10P-05            A                TRUE
+19 TCGA-BH-A0C0-01A-21D-A10P-05            A                TRUE
+> 
+> 
+> write.csv(
++   brca_manifest,
++   "05_FinalResults/Step5_SampleMaps/BRCA_preliminary_sample_manifest.csv",
++   row.names = FALSE
++ )
+> 
+> 
+> # ============================================================
+> # PART F — PRELIMINARY PRAD FINAL SAMPLE MANIFEST
+> # ============================================================
+> 
+> cat("\n============================================================\n")
+
+============================================================
+> cat("5.3F — PRAD PRELIMINARY SAMPLE MANIFEST\n")
+5.3F — PRAD PRELIMINARY SAMPLE MANIFEST
+> cat("============================================================\n")
+============================================================
+> 
+> 
+> prad_manifest <- data.frame(
++   patient_id = prad_ids,
++   stringsAsFactors = FALSE
++ )
+> 
+> 
+> # ------------------------------------------------------------
+> # RNA primary tumor
+> # ------------------------------------------------------------
+> 
+> pr

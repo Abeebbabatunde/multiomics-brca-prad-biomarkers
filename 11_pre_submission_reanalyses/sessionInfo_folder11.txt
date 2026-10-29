@@ -1,0 +1,94 @@
+R version 4.6.0 (2026-04-24 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 22000)
+
+Matrix products: default
+  LAPACK version 3.12.1
+
+locale:
+[1] LC_COLLATE=English_Namibia.utf8  LC_CTYPE=English_Namibia.utf8   
+[3] LC_MONETARY=English_Namibia.utf8 LC_NUMERIC=C                    
+[5] LC_TIME=English_Namibia.utf8    
+
+time zone: Africa/Lagos
+tzcode source: internal
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets  methods  
+[9] base     
+
+other attached packages:
+ [1] MOFA2_1.22.0                                      
+ [2] mixOmics_6.36.0                                   
+ [3] ggplot2_4.0.3                                     
+ [4] lattice_0.22-9                                    
+ [5] MASS_7.3-65                                       
+ [6] data.table_1.18.2.1                               
+ [7] IlluminaHumanMethylation450kanno.ilmn12.hg19_0.6.1
+ [8] minfi_1.58.0                                      
+ [9] bumphunter_1.54.0                                 
+[10] locfit_1.5-9.12                                   
+[11] iterators_1.0.14                                  
+[12] foreach_1.5.2                                     
+[13] Biostrings_2.79.5                                 
+[14] XVector_0.52.0                                    
+[15] SummarizedExperiment_1.42.0                       
+[16] MatrixGenerics_1.24.0                             
+[17] matrixStats_1.5.0                                 
+[18] GenomicRanges_1.64.0                              
+[19] Seqinfo_1.2.0                                     
+[20] org.Hs.eg.db_3.23.1                               
+[21] AnnotationDbi_1.74.0                              
+[22] IRanges_2.46.0                                    
+[23] S4Vectors_0.50.0                                  
+[24] Biobase_2.72.0                                    
+[25] BiocGenerics_0.58.0                               
+[26] generics_0.1.4                                    
+[27] pROC_1.19.0.1                                     
+[28] e1071_1.7-17                                      
+[29] Boruta_10.0.0                                     
+[30] limma_3.68.2                                      
+[31] glmnet_5.0                                        
+[32] Matrix_1.7-5                                      
+
+loaded via a namespace (and not attached):
+  [1] RColorBrewer_1.1-3        rstudioapi_0.18.0         jsonlite_2.0.0           
+  [4] shape_1.4.6.1             magrittr_2.0.5            GenomicFeatures_1.64.0   
+  [7] corrplot_0.95             farver_2.1.2              BiocIO_1.22.0            
+ [10] vctrs_0.7.3               multtest_2.68.0           memoise_2.0.1            
+ [13] Rsamtools_2.28.0          DelayedMatrixStats_1.34.0 RCurl_1.98-1.18          
+ [16] askpass_1.2.1             forcats_1.0.1             S4Arrays_1.12.0          
+ [19] curl_7.1.0                Rhdf5lib_2.0.0            SparseArray_1.12.2       
+ [22] rhdf5_2.56.0              nor1mix_1.3-3             basilisk_1.24.0          
+ [25] plyr_1.8.9                cachem_1.1.0              GenomicAlignments_1.48.0 
+ [28] igraph_2.3.0              lifecycle_1.0.5           pkgconfig_2.0.3          
+ [31] R6_2.6.1                  fastmap_1.2.0             digest_0.6.39            
+ [34] rARPACK_0.11-0            siggenes_1.86.0           reshape_0.8.10           
+ [37] RSpectra_0.16-2           ellipse_0.5.0             RSQLite_2.4.6            
+ [40] base64_2.0.2              filelock_1.0.3            httr_1.4.8               
+ [43] abind_1.4-8               compiler_4.6.0            beanplot_1.3.1           
+ [46] rngtools_1.5.2            proxy_0.4-29              bit64_4.8.0              
+ [49] withr_3.0.2               S7_0.2.2                  BiocParallel_1.46.0      
+ [52] DBI_1.3.0                 fru_1.0.0                 HDF5Array_1.40.0         
+ [55] openssl_2.4.0             DelayedArray_0.38.1       corpcor_1.6.10           
+ [58] rjson_0.2.23              tools_4.6.0               otel_0.2.0               
+ [61] rentrez_1.2.4             glue_1.8.1                quadprog_1.5-8           
+ [64] h5mread_1.4.0             restfulr_0.0.16           nlme_3.1-169             
+ [67] rhdf5filters_1.24.0       grid_4.6.0                Rtsne_0.17               
+ [70] reshape2_1.4.5            gtable_0.3.6              tzdb_0.5.0               
+ [73] class_7.3-23              preprocessCore_1.74.0     tidyr_1.3.2              
+ [76] hms_1.1.4                 xml2_1.5.2                stringr_1.6.0            
+ [79] ggrepel_0.9.8             pillar_1.11.1             genefilter_1.94.0        
+ [82] splines_4.6.0             dplyr_1.2.1               survival_3.8-6           
+ [85] rtracklayer_1.72.0        bit_4.6.0                 GEOquery_2.80.0          
+ [88] annotate_1.90.0           tidyselect_1.2.1          gridExtra_2.3            
+ [91] scrime_1.3.7              statmod_1.5.1             pheatmap_1.0.13          
+ [94] stringi_1.8.7             yaml_2.3.12               codetools_0.2-20         
+ [97] cigarillo_1.2.0           tibble_3.3.1              cli_3.6.6                
+[100] uwot_0.2.4                reticulate_1.46.0         xtable_1.8-8             
+[103] Rcpp_1.1.1-1.1            dir.expiry_1.20.0         png_0.1-9                
+[106] XML_3.99-0.23             readr_2.2.0               blob_1.3.0               
+[109] mclust_6.1.2              doRNG_1.8.6.3             sparseMatrixStats_1.24.0 
+[112] bitops_1.0-9              scales_1.4.0              illuminaio_0.54.0        
+[115] purrr_1.2.2               crayon_1.5.3              rlang_1.2.0              
+[118] cowplot_1.2.0             KEGGREST_1.52.0          
