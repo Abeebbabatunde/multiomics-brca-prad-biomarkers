@@ -15,3 +15,6 @@ keywords:
   - TCGA
   - breast cancer
   - prostate cancer
+  - stability selection
+# After the first Zenodo release, add the DOI here:
+# doi: "10.5281/zenodo.XXXXXXX"
