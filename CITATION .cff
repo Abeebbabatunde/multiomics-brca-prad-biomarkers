@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use these scripts, please cite them as below."
+type: software
+title: "Multi-omics biomarker discovery in early-stage breast and prostate cancer: analysis scripts"
+version: "1.0.0"
+authors:
+  - family-names: "Jamiu"
+    given-names: "Abeeb Babatunde"
+year: 2026
+doi: "10.5281/zenodo.24367327"
+repository-code: "https://github.com/Abeebbabatunde/multiomics-brca-prad-biomarkers"
+license: MIT
+keywords:
+  - multi-omics
+  - biomarker discovery
+  - TCGA
+  - breast cancer
+  - prostate cancer
+  - stability selection

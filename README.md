@@ -7,6 +7,8 @@ If you use these scripts, please cite:
 
 Jamiu AB (2026). Multi-omics biomarker discovery in early-stage breast and prostate cancer: analysis scripts. GitHub. https://github.com/Abeebbabatunde/multiomics-brca-prad-biomarkers
 
+Version 1.0.0 is archived on Zenodo: https://doi.org/10.5281/zenodo.24367327
+
 `CITATION.cff` holds the same information in machine-readable form (GitHub shows it as "Cite this repository").
 
 ## Setup
