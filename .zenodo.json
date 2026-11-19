@@ -1,0 +1,14 @@
+{
+  "title": "Multi-omics biomarker discovery in early-stage breast and prostate cancer: analysis scripts",
+  "upload_type": "software",
+  "description": "<p>R scripts for the paired tumour-versus-normal analysis of TCGA-BRCA and TCGA-PRAD (methylation, RNA and protein), integration with MOFA2 and DIABLO, patient-grouped stability selection and nested resampling, permuted-label and leakage controls, external validation in GEO cohorts, and clinical analyses. The data are not included; they are available from the NCI Genomic Data Commons and the Gene Expression Omnibus.</p>",
+  "creators": [
+    {
+      "name": "Jamiu, Abeeb Babatunde",
+      "affiliation": "Federal University of Lafia, Nasarawa State, Nigeria"
+    }
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": ["multi-omics", "biomarker discovery", "TCGA", "breast cancer", "prostate cancer", "stability selection"]
+}
