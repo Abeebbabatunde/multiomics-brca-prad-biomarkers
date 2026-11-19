@@ -73,4 +73,11 @@ Data are not stored in this repository.
 - **`needs_further_validation` (Step 10 panel tables).** The column is produced by `10_1_final_panel_tables_EDITED.R` and flags only features that could not be evaluated externally (VAV1 and CHD9NB in BRCA). The tables were not regenerated after the nested analysis in folder 11, in which the locked features were not reliably re-selected; the thesis therefore treats all panel features as requiring validation in independent patients.
 - **Metabolomics was excluded**; `01_5` records the decision.
 - **Vital-status imbalance.** The RPPA patients are 53% dead against 8.5% of the others (Fisher p = 1.6e-09); no survival variable was used in the selection.
-- The enrichment queries to KEGG were made online; record the date and package versions with the results.
+- The enrichment queries to KEGG were made online; record the date and package versions with the results.## Rebuild and manuscript scripts
+
+| Folder | Content |
+|---|---|
+| 12_rebuild_patient_grouped/ | The rebuild with patients kept together: cohorts, stability selection, patient-grouped DIABLO, leakage demonstrations, comparison with the initial panels, external validation and clinical analyses (thesis Step 12.0) |
+| 13_manuscript_support/ | Scripts that draw the manuscript figures and run the checks made during manuscript preparation |
+
+Seed 2026 is used for all resampling in folders 11 and 12, and seed 42 for the random forests of the external validation.
